@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "696023446009",
+    "project_id": "be-bold-5a751",
+    "storage_bucket": "be-bold-5a751.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:696023446009:android:7acb037cfc9776fd304d28",
+        "android_client_info": {
+          "package_name": "com.mariediggs.bebold"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "696023446009-lkt5niiuvt1q69pm45k6c974tl9m3p8g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCo6DR2W6qgkaEYHb9LzH5cE71TrftDVGY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "696023446009-lkt5niiuvt1q69pm45k6c974tl9m3p8g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "696023446009-286jdb7iovu4ruto2c9n6nv4p71h5atq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mariediggs.bebold"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
