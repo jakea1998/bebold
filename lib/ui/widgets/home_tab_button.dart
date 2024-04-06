@@ -1,7 +1,6 @@
 import 'package:be_bold/constants/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+
 
 class HomeTabButton extends StatelessWidget {
   final String text;
@@ -20,7 +19,7 @@ class HomeTabButton extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           color: lightBlueColor1,
-          child: Container(
+          child: SizedBox(
             
             width: 350,
             child: Center(
@@ -30,10 +29,10 @@ class HomeTabButton extends StatelessWidget {
                   children: [
                     Text(
                       text,
-                      style: TextStyle(color: Colors.white,fontSize: 20),
+                      style: const TextStyle(color: Colors.white,fontSize: 20),
                     ),
-                    Spacer(flex: 1,),
-                    Icon(Icons.keyboard_arrow_right,color: Colors.white,size: 30,)
+                    const Spacer(flex: 1,),
+                    const Icon(Icons.keyboard_arrow_right,color: Colors.white,size: 30,)
                   ],
                 ),
               ),

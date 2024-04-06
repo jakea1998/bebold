@@ -1,20 +1,19 @@
 import 'package:be_bold/blocs/lives_changed/lives_changed_bloc.dart';
-import 'package:be_bold/blocs/repos/audio_video_repo.dart';
 import 'package:be_bold/blocs/user/user_bloc.dart';
 import 'package:be_bold/constants/colors.dart';
-import 'package:be_bold/models/firebase_file.dart';
 import 'package:be_bold/ui/pages/personal_info_page.dart';
 import 'package:be_bold/ui/tabs/home_tab.dart';
 import 'package:be_bold/ui/tabs/insight_tab.dart';
 import 'package:be_bold/ui/tabs/lives_changed_tab.dart';
 import 'package:be_bold/ui/tabs/more_tab.dart';
 import 'package:be_bold/ui/tabs/reports_tab.dart';
+import 'package:be_bold/ui/widgets/account_required_dialog.dart';
 import 'package:be_bold/ui/widgets/app_bar.dart';
-import 'package:be_bold/ui/widgets/bottom_nav_bar.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class HomePage extends StatefulWidget {
   final int? tabIndex;
@@ -31,8 +30,10 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    BlocProvider.of<UserBloc>(context).add(UserEventLoadUser());
-     BlocProvider.of<LivesChangedBloc>(context).add(LivesChangedEventLoadLives());
+
+    BlocProvider.of<UserBloc>(context).add(UserEventLoadUser(
+        livesChangedBloc: BlocProvider.of<LivesChangedBloc>(context)));
+
     navIndex = widget.tabIndex ?? 0;
   }
 
@@ -40,28 +41,37 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar1(
-          leading: IconButton(
-            icon: Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 25,
-            ),
-            onPressed: () {
+            //leading: Container(),
+
+            leading: IconButton(
+          icon: const Icon(
+            Icons.person,
+            color: Colors.white,
+            size: 25,
+          ),
+          onPressed: () {
+            if (BlocProvider.of<UserBloc>(context).state.userExists ?? false) {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => PersonalInfoPage()));
-            },
-          ),
-        ),
+            } else {
+              showDialog(
+                  context: context,
+                  builder: (context) => const AccountRequiredDialog(
+                      title: "User Doesn't Exist",
+                      text: "Please create an account or login."));
+            }
+          },
+        )),
         body: AnimatedSwitcher(
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           child: _buildBody(navIndex),
         ),
         bottomNavigationBar: BottomNavigationBar(
             backgroundColor: darkBlueColor1,
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.white,
-            selectedLabelStyle: TextStyle(color: Colors.white),
-            unselectedLabelStyle: TextStyle(color: Colors.white),
+            selectedLabelStyle: const TextStyle(color: Colors.white),
+            unselectedLabelStyle: const TextStyle(color: Colors.white),
             type: BottomNavigationBarType.fixed,
             currentIndex: navIndex,
             onTap: (index) {
@@ -90,7 +100,7 @@ class _HomePageState extends State<HomePage> {
                   label: "List"),
               BottomNavigationBarItem(
                   icon: Icon(
-                    Icons.speaker_notes_outlined,
+                   Bootstrap.receipt,
                     color: Colors.white,
                   ),
                   label: "Report"),
@@ -104,7 +114,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   _buildBody(int? index) {
-   
     if (index == 0) {
       return HomeTab();
     } else if (index == 1) {
@@ -115,7 +124,8 @@ class _HomePageState extends State<HomePage> {
       return ReportsTab();
     } else if (index == 4) {
       return MoreTab();
-    } else
+    } else {
       return Container();
+    }
   }
 }

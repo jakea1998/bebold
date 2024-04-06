@@ -1,150 +1,163 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:be_bold/constants/colors.dart';
-import 'package:be_bold/models/firebase_file.dart';
 import 'package:be_bold/ui/widgets/continue_button.dart';
+import 'package:be_bold/ui/widgets/error_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:perfect_volume_control/perfect_volume_control.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:just_audio/just_audio.dart';
 
 import '../../models/task_info.dart';
-import 'reaffirmation_page.dart';
+import '../widgets/audio_video_progress_bar.dart';
+import 'affirmation_page.dart';
 
 class AudioPage extends StatefulWidget {
-  final TaskInfo file;
+  final TaskInfo2 file;
   final bool isDownloaded;
   const AudioPage({Key? key, required this.file, required this.isDownloaded})
       : super(key: key);
 
   @override
-  State<AudioPage> createState() => _AudioPageState();
+  State<AudioPage> createState() => AudioPageState();
 }
 
-class _AudioPageState extends State<AudioPage> {
-  bool isPlaying = false;
-  Duration duration = Duration.zero;
-  int time = 0;
+class AudioPageState extends State<AudioPage> with WidgetsBindingObserver {
   double currentvol = 0.5;
-  String timeLeft = "";
-  double progress = 0.0;
-  final audioPlayer = AudioPlayer();
-  bool isStarted = false;
-  startPlaying() async {
-    if (!isStarted) {
-      if(widget.isDownloaded){
-        await audioPlayer.play(DeviceFileSource(widget.file.filePath ));
-      } else {
-        await audioPlayer.play(UrlSource(widget.file.link ?? ""));
-      }
-      
-      isStarted = true;
-    } else
-      await audioPlayer.resume();
-    // time  = await audioPlayer.getDuration();
-  }
 
-  getTimeLeft() {
-    if (duration == null) {
-      setState(() {
-        timeLeft = "Time Left 0s";
-      });
-    } else {
-      setState(() {
-        timeLeft = "Time Left ${duration.inSeconds}s";
-      });
-    }
-  }
-
-  getProgress() {
-    if (time == null || duration == null) {
-      setState(() {
-        progress = 0.0;
-      });
-    } else {
-      setState(() {
-        progress = time / (duration.inMilliseconds);
-      });
-    }
-  }
+  AudioPlayer audioPlayer = AudioPlayer();
 
   void initSource() async {
-    if(widget.isDownloaded){
-      await audioPlayer.setSourceDeviceFile(widget.file.filePath.replaceAll(" ", "%20"));
+    if (widget.isDownloaded) {
+      try {
+        await audioPlayer.setFilePath(widget.file.filePath);
+      } on PlayerException catch (e) {
+        showDialog(
+            context: context,
+            builder: (context) => ErrorDialog(
+                title: "Error",
+                text: "Error occurred while loading audio: ${e.message}."));
+      } catch (e) {
+        showDialog(
+            context: context,
+            builder: (context) => const ErrorDialog(
+                title: "Error",
+                text: "Unknown Error occurred while loading audio."));
+      }
     } else {
-      await audioPlayer.setSourceUrl(widget.file.link ?? "");
+      try {
+        await audioPlayer.setUrl(widget.file.link.replaceAll(" ", "%20"));
+      } catch (e) {
+        showDialog(
+            context: context,
+            builder: (context) => const ErrorDialog(
+                title: "Error",
+                text: "An unknown error occured with the audio player."));
+      }
     }
-    
-    final d1 = await audioPlayer.getDuration();
-    time = d1?.inMilliseconds ?? 0;
-    print(time);
-    setState(() {});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      audioPlayer.stop();
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    PerfectVolumeControl.hideUI =
-        false; //set if system UI is hided or not on volume up/down
-    Future.delayed(Duration.zero, () async {
-      currentvol = await PerfectVolumeControl.getVolume();
-      setState(() {
-        //refresh UI
-      });
-    });
+    ambiguate(WidgetsBinding.instance)!.addObserver(this);
     initSource();
-    PerfectVolumeControl.stream.listen((volume) {
-      print(volume);
-      setState(() {
-        currentvol = volume;
-      });
-    });
-    audioPlayer.onPositionChanged.listen((Duration p) async {
+    audioPlayer.setVolume(currentvol);
+    audioPlayer.volumeStream.listen((volume) {
       if (mounted) {
-        final d = await audioPlayer.getDuration();
-        time = d?.inMilliseconds ?? 0;
-        duration = p;
-        if (duration == null) {
-          timeLeft = "Time Left 0s/0s";
-        } else {
-          timeLeft = "Time Left ${duration.inSeconds}s/${time / 1000}s";
-        }
-        if (time == null || duration == null) {
-          progress = 0.0;
-        } else {
-          progress = (duration.inMilliseconds) / time;
-        }
-
-        setState(() {});
+        setState(() {
+          currentvol = volume;
+        });
       }
     });
-    audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
-      print("$state");
-      if (state == PlayerState.playing) {
-        setState(() {
-          isPlaying = true;
-        });
+
+    audioPlayer.playbackEventStream.listen((event) {},
+        onError: (Object e, StackTrace st) {
+      if (e is PlayerException) {
+        showDialog(
+            context: context,
+            builder: (context) => ErrorDialog(
+                title: "Error", text: "Error playing media: ${e.message}"));
+      } else if (e is PlayerInterruptedException) {
+        // This call was interrupted since another audio source was loaded or the
+        // player was stopped or disposed before this audio source could complete
+        // loading.
+
+        showDialog(
+            context: context,
+            builder: (context) => ErrorDialog(
+                title: "Error",
+                text: "Connection lost with Audio Player: ${e.message}"));
       } else {
-        if (mounted) {
-          setState(() {
-            isPlaying = false;
-          });
-        }
+        // Fallback for all other errors
+        showDialog(
+            context: context,
+            builder: (context) => const ErrorDialog(
+                title: "Error", text: "An error occurred with Audio Player."));
       }
     });
   }
 
+  Widget replayButton() => IconButton(
+        padding: EdgeInsets.zero,
+        onPressed: () async {
+          await audioPlayer.seek(Duration.zero);
+          await audioPlayer.play();
+        },
+        icon: Icon(
+          Icons.replay,
+          size: 30,
+          color: Colors.grey[700],
+        ),
+      );
+  Widget playButton() => IconButton(
+        padding: EdgeInsets.zero,
+        onPressed: () async {
+          await audioPlayer.play();
+        },
+        icon: Icon(
+          Icons.play_arrow,
+          size: 30,
+          color: Colors.grey[700],
+        ),
+      );
+  Widget pauseButton() => IconButton(
+      padding: EdgeInsets.zero,
+      onPressed: () async {
+        await audioPlayer.pause();
+      },
+      icon: Icon(
+        Icons.pause,
+        size: 30,
+        color: Colors.grey[700],
+      ));
+  Widget loadingIcon() => const SizedBox(
+        width: 30,
+        height: 30,
+        child: GFLoader(
+          type: GFLoaderType.ios,
+        ),
+      );
+
   @override
-  void dispose() async {
+  void dispose() {
+    ambiguate(WidgetsBinding.instance)!.removeObserver(this);
+
+    audioPlayer.stop();
+    audioPlayer.dispose();
     super.dispose();
-    await audioPlayer.release();
-    await audioPlayer.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ThemeData(appBarTheme: AppBarTheme(color: darkBlueColor1)),
+      data: ThemeData(appBarTheme: const AppBarTheme(color: darkBlueColor1)),
       child: Scaffold(
           appBar: AppBar(
             leading: BackButton(
@@ -157,95 +170,135 @@ class _AudioPageState extends State<AudioPage> {
           body: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Row(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(15),
                     child: Text(
-                      widget.file.name?.toString().replaceAll(".mp3", "") ?? "",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w400, fontSize: 18),
+                      widget.file.displayName.toString().replaceAll(".mp3", ""),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w400, fontSize: 18),
                     ),
                   ),
-                  Spacer(
+                  const Spacer(
                     flex: 1,
                   )
                 ],
               ),
               Container(
-                margin: EdgeInsets.only(bottom: 15, left: 15, right: 15),
+                margin: const EdgeInsets.only(bottom: 15, left: 15, right: 15),
                 height: 50,
                 decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(5)),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8, right: 8, top: 8.0),
-                  child: Row(children: [
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        isPlaying ? audioPlayer.pause() : startPlaying();
-                        setState(() {});
-                      },
-                      icon: isPlaying
-                          ? Icon(
-                              Icons.pause,
-                              size: 35,
-                              color: Colors.grey[700],
-                            )
-                          : Icon(
-                              Icons.play_arrow,
-                              size: 35,
-                              color: Colors.grey[700],
-                            ),
-                    ),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          backgroundColor: Colors.grey[600],
-                          color: lightBlueColor1 ?? Colors.blue,
-                          value: progress,
-                          minHeight: 8,
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(left: 6, right: 6),
+                          width: 35,
+                          height: 35,
+                          child: StreamBuilder<PlayerState>(
+                              stream: audioPlayer.playerStateStream,
+                              initialData:
+                                  PlayerState(false, ProcessingState.loading),
+                              builder: (context, snapshot) {
+                                final state = snapshot.data!;
+
+                                switch (state.processingState) {
+                                  case ProcessingState.buffering:
+                                    return state.playing
+                                        ? pauseButton()
+                                        : loadingIcon();
+
+                                  case ProcessingState.completed:
+                                    return replayButton();
+
+                                  case ProcessingState.idle:
+                                    return state.playing
+                                        ? pauseButton()
+                                        : playButton();
+
+                                  case ProcessingState.loading:
+                                    return state.playing
+                                        ? pauseButton()
+                                        : loadingIcon();
+
+                                  case ProcessingState.ready:
+                                    return state.playing
+                                        ? pauseButton()
+                                        : playButton();
+                                }
+                              }),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Text(
-                          '${(time / 60000).toInt()}:${(((time % 60000) / 1000).round().toInt()).toString().padLeft(2, '0')}'),
-                    ),
-                    Icon(
-                      Icons.volume_down,
-                      size: 30,
-                      color: Colors.grey[700],
-                    ),
-                    SizedBox(
-                      width: 60,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          backgroundColor: Colors.grey[600],
-                          color: lightBlueColor1 ?? Colors.blue,
-                          value: currentvol,
-                          minHeight: 8,
+                        Expanded(
+                            child: StreamBuilder<Duration>(
+                                stream: audioPlayer.positionStream,
+                                builder: (context, snapshot) {
+                                  return ProgressBar(
+                                      progress: audioPlayer.position,
+                                      barHeight: 8,
+                                      thumbRadius: 0,
+                                      buffered: audioPlayer.bufferedPosition,
+                                      bufferedBarColor: Colors.grey[500],
+                                      onSeek: (value) =>
+                                          audioPlayer.seek(value),
+                                      thumbGlowColor: Colors.transparent,
+                                      thumbColor: Colors.transparent,
+                                      baseBarColor: Colors.grey[600],
+                                      timeLabelLocation:
+                                          TimeLabelLocation.sides,
+                                      total:
+                                          audioPlayer.duration ?? Duration.zero,
+                                      barCapShape: BarCapShape.round);
+                                })),
+                        Icon(
+                          Icons.volume_down,
+                          size: 30,
+                          color: Colors.grey[700],
                         ),
-                      ),
-                    ),
-                  ]),
+                        SizedBox(
+                            width: 100,
+                            height: double.infinity,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: ProgressBar(
+                                progress: Duration(
+                                    milliseconds: (currentvol * 1000).toInt()),
+                                barHeight: 8,
+                                thumbRadius: 0,
+                                onSeek: (value) => audioPlayer.setVolume(
+                                    ((value.inMilliseconds) / 1000).toDouble()),
+                                thumbGlowColor: Colors.transparent,
+                                thumbColor: Colors.transparent,
+                                baseBarColor: Colors.grey[600],
+                                timeLabelLocation: TimeLabelLocation.sides,
+                                timeLabelPadding: 0,
+                                timeLabelTextStyle: const TextStyle(
+                                    fontSize: 0, color: Colors.transparent),
+                                total: const Duration(seconds: 1),
+                                barCapShape: BarCapShape.round,
+                              ),
+                            )),
+                      ]),
                 ),
               ),
               ContinueButton(onTapped: () {
+                audioPlayer.stop();
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ReaffirmationPage()));
+                        builder: (context) => const AffirmationPage()));
               })
             ],
           )),
     );
   }
+
+  T? ambiguate<T>(T? value) => value;
 }

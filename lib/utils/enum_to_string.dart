@@ -1,8 +1,8 @@
 class EnumToString{
   static bool _isEnumItem(enumItem) {
-    final split_enum = enumItem.toString().split('.');
-    return split_enum.length > 1 &&
-        split_enum[0] == enumItem.runtimeType.toString();
+    final splitEnum = enumItem.toString().split('.');
+    return splitEnum.length > 1 &&
+        splitEnum[0] == enumItem.runtimeType.toString();
   }
   static T? fromString<T>(List<T> enumValues, String? value,
       {bool camelCase = false}) {
@@ -11,7 +11,7 @@ class EnumToString{
           EnumToString.convertToString(enumItem, camelCase: camelCase)
               .toLowerCase() ==
           value!.toLowerCase());
-    } catch( StateError ){
+    } on StateError catch( _ ){
       return null;
     }
   }
@@ -26,6 +26,7 @@ class EnumToString{
   static const String defaultPattern = WORD;
  static String camelCaseToWords(String subject,
     [Pattern customPattern = defaultPattern]) {
+  // ignore: unnecessary_type_check
   if (subject is! String || subject.isEmpty) {
     return '';
   }

@@ -1,4 +1,4 @@
-import 'package:be_bold/models/item_holder.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
@@ -11,18 +11,20 @@ class DownloadListItem extends StatelessWidget {
     required this.leading,
     required this.onDownloadedTap,
     required this.onNotDownloadedTap,
+    required this.connectedToInternet,
     this.onActionTap,
     this.onCancel,
   }) : super(key: key);
 
-  final ItemHolder data;
-  final Function(TaskInfo) onDownloadedTap;
-  final Function(TaskInfo) onNotDownloadedTap;
+  final TaskInfo2 data;
+  final bool connectedToInternet;
+  final Function(TaskInfo2) onDownloadedTap;
+  final Function(TaskInfo2) onNotDownloadedTap;
   final Widget leading;
-  final Function(TaskInfo)? onActionTap;
-  final Function(TaskInfo)? onCancel;
+  final Function(TaskInfo2)? onActionTap;
+  final Function(TaskInfo2)? onCancel;
 
-  Widget? _buildTrailing(TaskInfo task) {
+  Widget? _buildTrailing(TaskInfo2 task) {
     if (task.status == DownloadTaskStatus.undefined) {
       return IconButton(
         onPressed: () => onActionTap?.call(task),
@@ -34,12 +36,12 @@ class DownloadListItem extends StatelessWidget {
       return Row(
         children: [
           Text('${task.progress}%'),
-          IconButton(
+          /* IconButton(
             onPressed: () => onActionTap?.call(task),
             constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
             icon: const Icon(Icons.pause, color: Colors.yellow),
             tooltip: 'Pause',
-          ),
+          ), */
         ],
       );
     } else if (task.status == DownloadTaskStatus.paused) {
@@ -52,13 +54,6 @@ class DownloadListItem extends StatelessWidget {
             icon: const Icon(Icons.play_arrow, color: Colors.green),
             tooltip: 'Resume',
           ),
-          /* if (onCancel != null)
-            IconButton(
-              onPressed: () => onCancel?.call(task),
-              constraints: const BoxConstraints(minHeight: 20, minWidth: 20),
-              icon: const Icon(Icons.cancel, color: Colors.red),
-              tooltip: 'Cancel',
-            ), */
         ],
       );
     } else if (task.status == DownloadTaskStatus.complete) {
@@ -98,7 +93,22 @@ class DownloadListItem extends StatelessWidget {
         ],
       );
     } else if (task.status == DownloadTaskStatus.enqueued) {
-      return const Text('Pending', style: TextStyle(color: Colors.orange));
+      return const Text('Pending', style: TextStyle(color: Colors.green));
+    } else {
+      return null;
+    }
+  }
+
+  void Function()? onTap() {
+    if (data.status == DownloadTaskStatus.complete) {
+      return () {
+        onDownloadedTap(data);
+      };
+    } else if (data.status == DownloadTaskStatus.undefined &&
+        connectedToInternet) {
+      return () {
+        onNotDownloadedTap(data);
+      };
     } else {
       return null;
     }
@@ -109,44 +119,33 @@ class DownloadListItem extends StatelessWidget {
     return Stack(children: [
       Center(
           child: ListTile(
-        onTap: data.task!.status == DownloadTaskStatus.complete
-            ? () {
-                print("filepath1:");
-                print(data.task?.filePath);
-
-                onDownloadedTap(data.task!);
-              }
-            : () {
-                onNotDownloadedTap(data!.task!);
-              },
-        contentPadding: EdgeInsets.all(12),
+        onTap: onTap(),
+        contentPadding: const EdgeInsets.all(12),
         leading: Container(
           height: 80,
           width: 80,
+          color: Colors.grey[300],
           child: Center(
               child: Icon(
             Icons.play_circle_outline_outlined,
             color: Colors.grey[500],
             size: 30,
           )),
-          color: Colors.grey[300],
         ),
-        title: Text(data!.name!.replaceAll('.mp4', ""),
+        title: Text(data.displayName.replaceAll('.mp4', "").replaceAll('.mp3', ""),
             maxLines: 1, softWrap: true, overflow: TextOverflow.ellipsis),
         trailing: SizedBox(
-          width: 100,
-          child: Row(
-            children: [
-              SizedBox(
-                  width: 80, child: _buildTrailing(data!.task!) ?? Container()),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 20,
-                color: Colors.grey,
-              ),
-            ],
-          )
-        ),
+            width: 100,
+            child: Row(
+              children: [
+                connectedToInternet ? SizedBox(width: 80, child: _buildTrailing(data) ?? Container()): const SizedBox(width: 80,),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 20,
+                  color: Colors.grey,
+                ),
+              ],
+            )),
       )),
       const Positioned(
         left: 0,
@@ -158,21 +157,20 @@ class DownloadListItem extends StatelessWidget {
           color: Colors.grey,
         ),
       ),
-      if (data.task!.status == DownloadTaskStatus.running ||
-          data.task!.status == DownloadTaskStatus.paused)
+      if ((data.status == DownloadTaskStatus.running  && connectedToInternet) ||
+          (data.status == DownloadTaskStatus.paused&& connectedToInternet))
         Positioned(
           left: 0,
           right: 0,
-          bottom: 0,
+          bottom: 3,
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
             child: LinearProgressIndicator(
-              minHeight: 3,
-              value: data.task!.progress! / 100,
+              minHeight: 5,
+              value: data.progress! / 100,
             ),
           ),
         )
     ]);
-    
   }
 }

@@ -1,33 +1,23 @@
-import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:android_path_provider/android_path_provider.dart';
 import 'package:be_bold/blocs/audio_video/audio_video_bloc.dart';
 import 'package:be_bold/constants/enums.dart';
-import 'package:be_bold/models/firebase_file.dart';
-import 'package:be_bold/ui/pages/audio_page.dart';
+import 'package:be_bold/models/task_info.dart';
 import 'package:be_bold/ui/pages/verse_page.dart';
-import 'package:be_bold/ui/pages/video_page.dart';
+import 'package:be_bold/ui/pages/witness_page/base_tab.dart';
 import 'package:be_bold/ui/widgets/app_bar.dart';
-import 'package:be_bold/ui/widgets/download_list_item.dart';
 import 'package:be_bold/ui/widgets/tab_bar.dart';
 import 'package:be_bold/ui/widgets/verse_content.dart';
 import 'package:be_bold/ui/widgets/verse_list_widget.dart';
 import 'package:be_bold/ui/widgets/verse_title.dart';
-import 'package:be_bold/utils/downloader_functions.dart';
 import 'package:be_bold/utils/port_functions.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import '../../models/item_holder.dart';
-import '../../models/task_info.dart';
+
 
 class WitnessPage extends StatefulWidget {
   final String title;
@@ -44,7 +34,7 @@ class _WitnessPageState extends State<WitnessPage>
   final ReceivePort _port = ReceivePort();
   @override
   void initState() {
-    // TODO: implement initState
+    
     super.initState();
     initPort();
     type = WitnessType.acquaintance;
@@ -62,6 +52,7 @@ class _WitnessPageState extends State<WitnessPage>
         type = WitnessType.newConnection;
         break;
     }
+    EasyLoading.show(status: "Loading...", dismissOnTap: false);
     BlocProvider.of<AudioVideoBloc>(context)
         .add(AudioVideoEventLoad(type: type));
 
@@ -74,14 +65,14 @@ class _WitnessPageState extends State<WitnessPage>
       'downloader_send_port',
     );
     if (!isSuccess) {
-      print("Not success");
       PortFunctions.unbindBackgroundIsolate();
       initPort();
       return;
     }
     _port.listen((dynamic data) {
+      
       final taskId = (data as List<dynamic>)[0] as String;
-      final status = data[1] as DownloadTaskStatus;
+      final status = DownloadTaskStatus.fromInt(data[1]);
       final progress = data[2] as int;
 
       print(
@@ -103,519 +94,78 @@ class _WitnessPageState extends State<WitnessPage>
     if (port1Exists) {
       PortFunctions.unbindBackgroundIsolate();
     }
-    /* final port2Exists = IsolateNameServer.lookupPortByName("downloader_send_port2") != null;
-    if(port2Exists){
-      PortFunctions.unbindBackgroundIsolate2();
-    } */
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar1(
-        title: widget.title,
-        bottom: PreferredSize(
-          preferredSize: Size(MediaQuery.of(context).size.width, 50),
-          child: AppTabBar(
+    return BlocListener<AudioVideoBloc, AudioVideoState>(
+      listener: (context, state) {
+        
+
+        if (EasyLoading.isShow &&
+            state.status != VerseAudioVideoStatus.loading) {
+          EasyLoading.dismiss();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar1(
+          title: widget.title,
+          bottom: PreferredSize(
+            preferredSize: Size(MediaQuery.of(context).size.width, 50),
+            child: AppTabBar(
+              controller: tabBarController,
+              tabItems: [
+                TabItem(
+                  title: "Verses",
+                ),
+                TabItem(title: "Videos"),
+                TabItem(
+                  title: "Audios",
+                )
+              ],
+            ),
+          ),
+          leading: BackButton(
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        body: SafeArea(
+          child: TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
             controller: tabBarController,
-            tabItems: [
-              TabItem(
-                title: "Verses",
+            children: [
+              const VerseTab(),
+              BaseTab(
+                witnessCategory: widget.title,
+                witnessType: type,
+                itemType: ItemType.Video,
               ),
-              TabItem(title: "Videos"),
-              TabItem(
-                title: "Audios",
+              BaseTab(
+                witnessCategory: widget.title,
+                witnessType: type,
+                itemType: ItemType.Audio,
               )
             ],
           ),
         ),
-        leading: BackButton(
-          color: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SafeArea(
-        child: TabBarView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: tabBarController,
-          children: [
-            VerseTab(),
-            VideoTab(
-              type: type,
-            ),
-            AudioTab(
-              type: type,
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class VideoTab extends StatefulWidget {
-  final WitnessType type;
-
-  const VideoTab({
-    Key? key,
-    required this.type,
-  }) : super(key: key);
-
-  @override
-  State<VideoTab> createState() => VideoTabState();
-}
-
-class VideoTabState extends State<VideoTab> {
-  late bool _permissionReady;
-
-  late String _localPath;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-
-    super.initState();
-    // _bindBackgroundIsolate();
-
-    FlutterDownloader.registerCallback(PortFunctions.downloadCallback, step: 1);
-
-    // _showContent = false;
-    _permissionReady = false;
-    // _saveInPublicStorage = false;
-    _checkPermissionReady();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-
-    super.dispose();
-  }
-
-  _checkPermissionReady() async {
-    final _permissionReady = await DownloaderFunctions.checkPermission();
-    print('permission ready');
-    print(_permissionReady);
-    if (_permissionReady) {
-      _localPath = await DownloaderFunctions.prepareSaveDir();
-    }
-    setState(() {});
-  }
-
-  /* void _bindBackgroundIsolate() {
-    widget.port.listen((dynamic data) {
-      final taskId = (data as List<dynamic>)[0] as String;
-      final status = data[1] as DownloadTaskStatus;
-      final progress = data[2] as int;
-
-      print(
-        'Callback on UI isolate: '
-        'task ($taskId) is in status ($status) and process ($progress)',
-      );
-
-      BlocProvider.of<AudioVideoBloc>(context).add(
-          AudioVideoEventUpdateLocalAudiosVideos(
-              taskId: taskId, progress: progress, status: status));
-    });
-  } */
-
-  Widget _buildNoPermissionWarning() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'Grant storage permission to continue',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.blueGrey, fontSize: 18),
-            ),
-          ),
-          const SizedBox(height: 32),
-          TextButton(
-            onPressed: _retryRequestPermission,
-            child: const Text(
-              'Retry',
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Future<void> _retryRequestPermission() async {
-    final hasGranted = await DownloaderFunctions.checkPermission();
-
-    if (hasGranted) {
-      _localPath = await DownloaderFunctions.prepareSaveDir();
-    }
-    setState(() {
-      _permissionReady = hasGranted;
-    });
-  }
-
-  Future<void> _delete(TaskInfo task) async {
-    await FlutterDownloader.remove(
-      taskId: task.taskId!,
-      shouldDeleteContent: true,
-    ).then((value) {
-      BlocProvider.of<AudioVideoBloc>(context).add(
-          AudioVideoEventUpdateLocalAudiosVideos(
-              progress: 0,
-              taskId: task.taskId ?? "",
-              status: DownloadTaskStatus.undefined));
-      BlocProvider.of<AudioVideoBloc>(context)
-          .add(AudioVideoEventLoad(type: widget.type));
-    });
-  }
-
-  Widget _buildList(
-      {required List<FirebaseFile> videos,
-      required List<ItemHolder> localVideos}) {
-    List<Widget> videoListWidgets = [];
-    for (int i = 0; i < (videos.length); i++) {
-      late Widget videoWidget;
-
-      videoWidget = Column(
-        children: [
-          DownloadListItem(
-            leading: Container(
-              height: 80,
-              width: 80,
-              child: Center(
-                  child: Icon(
-                Icons.play_circle_outline_outlined,
-                color: Colors.grey[500],
-                size: 30,
-              )),
-              color: Colors.grey[300],
-            ),
-            onActionTap: (task) {
-              if (task.status == DownloadTaskStatus.undefined) {
-                DownloaderFunctions.requestDownload(
-                    task: task,
-                    localPath: _localPath,
-                    saveInPublicStorage: false);
-              } else if (task.status == DownloadTaskStatus.running) {
-                DownloaderFunctions.pauseDownload(task: task);
-              } else if (task.status == DownloadTaskStatus.paused) {
-                DownloaderFunctions.resumeDownload(
-                    task: task, context: context);
-              } else if (task.status == DownloadTaskStatus.complete ||
-                  task.status == DownloadTaskStatus.canceled) {
-                _delete(task);
-              } else if (task.status == DownloadTaskStatus.failed) {
-                DownloaderFunctions.retryDownload(task: task, context: context);
-              }
-            },
-            onCancel: (info) {},
-            data: localVideos[i],
-            onDownloadedTap: (task) {
-              print('filepath');
-              print(task.filePath);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          VideoPage(file: task, isDownloaded: true)));
-            },
-            onNotDownloadedTap: (task) {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          VideoPage(file: task, isDownloaded: false)));
-            },
-          )
-        ],
-      );
-      videoListWidgets.add(videoWidget);
-    }
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(15),
-          child: Row(
-            children: [
-              Text(
-                "Videos",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              Spacer(
-                flex: 1,
-              )
-            ],
-          ),
-        ),
-        ...videoListWidgets
-      ],
-    );
-  }
-
-  Widget _buildNotDownloadedList() {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(15),
-          child: Row(
-            children: [
-              Text(
-                "Videos",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              Spacer(
-                flex: 1,
-              )
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: BlocBuilder<AudioVideoBloc, AudioVideoState>(
-        builder: (context, state) {
-          return ListView(
-            children: [
-              _buildList(
-                  videos: state.networkVideos ?? [],
-                  localVideos: state.localVideos ?? [])
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class AudioTab extends StatefulWidget {
-  final WitnessType type;
-
-  const AudioTab({
-    Key? key,
-    required this.type,
-  }) : super(key: key);
-
-  @override
-  State<AudioTab> createState() => AudioTabState();
-}
-
-class AudioTabState extends State<AudioTab> {
-  late bool _permissionReady;
-
-  late String _localPath;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-
-    super.initState();
-
-    FlutterDownloader.registerCallback(PortFunctions.downloadCallback, step: 1);
-
-    // _showContent = false;
-    _permissionReady = false;
-    // _saveInPublicStorage = false;
-    _checkPermissionReady();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-
-    super.dispose();
-  }
-
-  _checkPermissionReady() async {
-    final _permissionReady = await DownloaderFunctions.checkPermission();
-    print('permission ready');
-    print(_permissionReady);
-    if (_permissionReady) {
-      _localPath = await DownloaderFunctions.prepareSaveDir();
-    }
-    setState(() {});
-  }
-
-  void _bindBackgroundIsolate() {
-    // _port.sendPort = IsolateNameServer.lookupPortByName("downloader_send_port2");
-  }
-
-  Widget _buildNoPermissionWarning() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'Grant storage permission to continue',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.blueGrey, fontSize: 18),
-            ),
-          ),
-          const SizedBox(height: 32),
-          TextButton(
-            onPressed: _retryRequestPermission,
-            child: const Text(
-              'Retry',
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Future<void> _retryRequestPermission() async {
-    final hasGranted = await DownloaderFunctions.checkPermission();
-
-    if (hasGranted) {
-      _localPath = await DownloaderFunctions.prepareSaveDir();
-    }
-    setState(() {
-      _permissionReady = hasGranted;
-    });
-  }
-
-  Future<void> _delete(TaskInfo task) async {
-    await FlutterDownloader.remove(
-      taskId: task.taskId!,
-      shouldDeleteContent: true,
-    ).then((value) {
-      BlocProvider.of<AudioVideoBloc>(context).add(
-          AudioVideoEventUpdateLocalAudiosVideos(
-              progress: 0,
-              taskId: task.taskId ?? "",
-              status: DownloadTaskStatus.undefined));
-      BlocProvider.of<AudioVideoBloc>(context)
-          .add(AudioVideoEventLoad(type: widget.type));
-    });
-  }
-
-  Widget _buildList(
-      {required List<FirebaseFile> audios,
-      required List<ItemHolder> localAudios}) {
-    List<Widget> audioListWidgets = [];
-
-    print('build list');
-    for (int i = 0; i < (audios.length); i++) {
-      late Widget audioWidget;
-
-      audioWidget = Column(
-        children: [
-          DownloadListItem(
-            leading: Center(
-                child: Icon(
-              Icons.headphones,
-              color: Colors.grey[500],
-              size: 30,
-            )),
-            onActionTap: (task) {
-              if (task.status == DownloadTaskStatus.undefined) {
-                DownloaderFunctions.requestDownload(
-                    task: task,
-                    localPath: _localPath,
-                    saveInPublicStorage: false);
-              } else if (task.status == DownloadTaskStatus.running) {
-                DownloaderFunctions.pauseDownload(task: task);
-              } else if (task.status == DownloadTaskStatus.paused) {
-                DownloaderFunctions.resumeDownload(
-                    task: task, context: context);
-              } else if (task.status == DownloadTaskStatus.complete ||
-                  task.status == DownloadTaskStatus.canceled) {
-                _delete(task);
-              } else if (task.status == DownloadTaskStatus.failed) {
-                DownloaderFunctions.retryDownload(task: task, context: context);
-              }
-            },
-            onCancel: (info) {},
-            onDownloadedTap: (task) {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AudioPage(file: task, isDownloaded: true)));
-            },
-            onNotDownloadedTap: (task) {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AudioPage(file: task, isDownloaded: false)));
-            },
-            data: localAudios[i],
-          )
-        ],
-      );
-      audioListWidgets.add(audioWidget);
-    }
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(15),
-          child: Row(
-            children: [
-              Text(
-                "Audios",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              Spacer(
-                flex: 1,
-              )
-            ],
-          ),
-        ),
-        ...audioListWidgets
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: BlocBuilder<AudioVideoBloc, AudioVideoState>(
-        builder: (context, state) {
-          return ListView(
-            children: [
-              _buildList(
-                  audios: state.networkAudios ?? [],
-                  localAudios: state.localAudios ?? [])
-            ],
-          );
-        },
       ),
     );
   }
 }
 
 class VerseTab extends StatelessWidget {
-  final List<String>? verses;
-
-  const VerseTab({Key? key, this.verses}) : super(key: key);
+  const VerseTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(15),
           child: Row(
             children: [
@@ -637,7 +187,7 @@ class VerseTab extends StatelessWidget {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VersePage(
+                          builder: (context) => const VersePage(
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -667,14 +217,14 @@ class VerseTab extends StatelessWidget {
                               )));
                 },
                 title: 'The Sin Issue',
-                verses: ["Romans 5:12", "Romans 3:23"],
+                verses: const ["Romans 5:12", "Romans 3:23"],
               ),
               VerseListWidget(
                 onTapped: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VersePage(
+                          builder: (context) => const VersePage(
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -716,14 +266,14 @@ class VerseTab extends StatelessWidget {
                               )));
                 },
                 title: 'The Rescue',
-                verses: ["St. John 3:16", "Romans 6:23", "Romans 5:8"],
+                verses: const ["St. John 3:16", "Romans 6:23", "Romans 5:8"],
               ),
               VerseListWidget(
                 onTapped: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VersePage(
+                          builder: (context) => const VersePage(
                                   child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -752,14 +302,14 @@ class VerseTab extends StatelessWidget {
                               ))));
                 },
                 title: 'The Savior',
-                verses: ["Acts 4:12", "1 Peter 3:18"],
+                verses: const ["Acts 4:12", "1 Peter 3:18"],
               ),
               VerseListWidget(
                 onTapped: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VersePage(
+                          builder: (context) => const VersePage(
                                   child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -776,14 +326,14 @@ class VerseTab extends StatelessWidget {
                               ))));
                 },
                 title: 'The New You',
-                verses: ["Romans 10:9-10, 13"],
+                verses: const ["Romans 10:9-10, 13"],
               ),
               VerseListWidget(
                 onTapped: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VersePage(
+                          builder: (context) => const VersePage(
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -801,14 +351,14 @@ class VerseTab extends StatelessWidget {
                               )));
                 },
                 title: 'The Gift',
-                verses: ["Ephesians 2:8-9"],
+                verses: const ["Ephesians 2:8-9"],
               ),
               VerseListWidget(
                 onTapped: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VersePage(
+                          builder: (context) => const VersePage(
                                   child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -825,14 +375,14 @@ class VerseTab extends StatelessWidget {
                               ))));
                 },
                 title: 'The Adoption',
-                verses: ["St. John 1:12"],
+                verses: const ["St. John 1:12"],
               ),
               VerseListWidget(
                 onTapped: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => VersePage(
+                          builder: (context) => const VersePage(
                                   child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -864,7 +414,7 @@ class VerseTab extends StatelessWidget {
                               ))));
                 },
                 title: 'Rededication',
-                verses: ["1 John 1:9"],
+                verses: const ["1 John 1:9"],
               ),
             ],
           ),

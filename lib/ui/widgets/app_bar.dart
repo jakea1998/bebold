@@ -1,15 +1,15 @@
+import 'package:be_bold/blocs/lives_changed/lives_changed_bloc.dart';
+import 'package:be_bold/blocs/user/user_bloc.dart';
 import 'package:be_bold/constants/colors.dart';
-import 'package:be_bold/ui/pages/login_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppBar1 extends StatelessWidget implements PreferredSizeWidget {
   final Widget leading;
   final String? title;
+  final bool? showLogout;
   final PreferredSizeWidget? bottom;
-  AppBar1({Key? key, required this.leading, this.title, this.bottom})
+  const AppBar1({Key? key, required this.leading, this.title,this.showLogout = true, this.bottom})
       : super(key: key);
 
   @override
@@ -19,40 +19,51 @@ class AppBar1 extends StatelessWidget implements PreferredSizeWidget {
       leading: leading,
       centerTitle: true,
       actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 10.0),
-          child: Column(
-            children: [
-              Spacer(
-                flex: 1,
-              ),
-              GestureDetector(
-                onTap: () async{
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
-                },
-                child: Text(
-                  "Logout",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+        showLogout?? true ? BlocBuilder<UserBloc, UserState>(
+          builder: (context, state) {
+            if (state.userStatus == UserStatus.loaded &&
+                (state.userExists ?? false)) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Column(
+                  children: [
+                    const Spacer(
+                      flex: 1,
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        BlocProvider.of<UserBloc>(context).add(
+                            UserEventLogoutUser(
+                                livesChangedBloc:
+                                    BlocProvider.of<LivesChangedBloc>(
+                                        context)));
+                      },
+                      child: const Text(
+                        "Logout",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                    const Spacer(
+                      flex: 1,
+                    ),
+                  ],
                 ),
-              ),
-              Spacer(
-                flex: 1,
-              ),
-            ],
-          ),
-        )
+              );
+            } else {
+              return Container();
+            }
+          },
+        ) : Container()
       ],
       bottom: bottom != null ? bottom : null,
       title: title == null
-          ?  Text(
+          ? const Text(
               "BE BOLD",
               style: TextStyle(color: Colors.white),
             )
-          :  Text(
+          : Text(
               title ?? "",
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
     );
   }
@@ -60,5 +71,5 @@ class AppBar1 extends StatelessWidget implements PreferredSizeWidget {
   @override
   // TODO: implement preferredSize
   Size get preferredSize =>
-      title != null ? Size.fromHeight(85) : Size.fromHeight(55);
+      title != null ? const Size.fromHeight(85) : const Size.fromHeight(55);
 }

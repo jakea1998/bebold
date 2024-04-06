@@ -1,9 +1,5 @@
 import 'package:be_bold/constants/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/basic.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 class ExpandableTab extends StatefulWidget {
   final String title;

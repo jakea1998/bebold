@@ -23,20 +23,20 @@ class Rectangle extends StatelessWidget {
             padding: const EdgeInsets.all(15.0),
             child: Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w400,
                   fontSize: 18),
             ),
           ),
-          Spacer(
+          const Spacer(
             flex: 1,
           ),
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: Text(
               number,
-              style: TextStyle(
+              style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w400,
                   fontSize: 18),

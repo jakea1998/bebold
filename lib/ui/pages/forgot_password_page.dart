@@ -1,5 +1,5 @@
 import 'package:be_bold/constants/colors.dart';
-import 'package:be_bold/ui/widgets/app_bar.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -20,7 +20,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   FirebaseAuth fbAuth = FirebaseAuth.instance;
   @override
   void initState() {
-    // TODO: implement initState
+   
     super.initState();
     emailController = TextEditingController();
 
@@ -48,9 +48,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         body: Form(
           key: formKey,
           child: SafeArea(
-            child: Container(
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
               child: Column(children: [
-                Padding(
+                const Padding(
                   padding:
                       EdgeInsets.only(left: 30, right: 30, bottom: 0, top: 20),
                   child: Text(
@@ -62,7 +64,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 20, left: 15, right: 15),
+                  padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(30),
                     child: TextFormField(
@@ -72,18 +74,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         }
                         return null;
                       },
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                      style: const TextStyle(color: Colors.grey, fontSize: 16),
                       textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.person_outline,
                             color: Colors.grey,
                           ),
-                          contentPadding: EdgeInsets.all(20),
+                          contentPadding: const EdgeInsets.all(20),
                           hintText: "E-mail ID",
                           filled: false,
-                          labelStyle: TextStyle(color: Colors.black),
-                          enabledBorder: UnderlineInputBorder(
+                          labelStyle: const TextStyle(color: Colors.black),
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(
                               color: Colors.grey,
                             ),
@@ -128,11 +130,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5)),
                       color: lightBlueColor1,
-                      child: Container(
+                      child: const SizedBox(
                         width: 350,
                         child: Center(
                           child: Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: EdgeInsets.all(12),
                             child: Center(
                               child: Text(
                                 "Reset Password",
@@ -147,8 +149,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                 ),
               ]),
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
+              
             ),
           ),
         ));

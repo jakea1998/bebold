@@ -36,6 +36,13 @@ class LivesChangedBloc extends Bloc<LivesChangedEvent, LivesChangedState> {
         emit(state.copyWith(status: LivesChangedStatus.error));
       }
     });
+    on<LivesChangedEventClearLives>((event, emit) {
+      if (livesChangedStream != null) livesChangedStream = null;
+      reportsBloc.add(const ReportsEventUpdateUsers(users: []));
+
+      emit(state.copyWith(
+          status: LivesChangedStatus.loaded, models: []));
+    });
     on<LivesChangedEventUpdateLives>((event, emit) {
       reportsBloc.add(ReportsEventUpdateUsers(users: event.models));
       emit(state.copyWith(

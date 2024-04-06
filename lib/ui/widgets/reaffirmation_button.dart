@@ -15,19 +15,22 @@ class ReaffirmationButton extends StatelessWidget {
         onTap: onTapped,
         child: Container(
         height: 50,
-        child: Center(child: Padding(
+        decoration: BoxDecoration(border: Border.all(color: darkBlueColor1,width: 1.5),borderRadius: BorderRadius.circular(5)),
+        child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("Start With This Prayer", style: TextStyle(color: darkBlueColor1,fontSize: 16,fontWeight: FontWeight.w400),),
+              Text(title, style: const TextStyle(color: darkBlueColor1,fontSize: 16,fontWeight: FontWeight.w400),),
               
-                Icon(Icons.navigate_next,color: darkBlueColor1,size: 30,),
+                
+                    const Icon(Icons.navigate_next,color: darkBlueColor1,size: 25,),
+                    
               
             ],),
-        )),
-        decoration: BoxDecoration(border: Border.all(color: darkBlueColor1,width: 1.5),borderRadius: BorderRadius.circular(5)),
+        ),
+        
       )),
     );
   }

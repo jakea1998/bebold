@@ -1,23 +1,26 @@
+import 'package:be_bold/blocs/user/user_bloc.dart';
 import 'package:be_bold/constants/colors.dart';
 import 'package:be_bold/ui/pages/rededication_prayer_page.dart';
 import 'package:be_bold/ui/pages/salvation_prayer_page.dart';
 import 'package:be_bold/ui/pages/user_info_page.dart';
+import 'package:be_bold/ui/widgets/account_required_dialog.dart';
 import 'package:be_bold/ui/widgets/continue_button.dart';
 import 'package:be_bold/ui/widgets/reaffirmation_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ReaffirmationPage extends StatefulWidget {
-  const ReaffirmationPage({Key? key}) : super(key: key);
+class AffirmationPage extends StatefulWidget {
+  const AffirmationPage({Key? key}) : super(key: key);
 
   @override
-  State<ReaffirmationPage> createState() => _ReaffirmationPageState();
+  State<AffirmationPage> createState() => _AffirmationPageState();
 }
 
-class _ReaffirmationPageState extends State<ReaffirmationPage> {
+class _AffirmationPageState extends State<AffirmationPage> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ThemeData(appBarTheme: AppBarTheme(color: darkBlueColor1)),
+      data: ThemeData(appBarTheme: const AppBarTheme(color: darkBlueColor1)),
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(
@@ -26,16 +29,15 @@ class _ReaffirmationPageState extends State<ReaffirmationPage> {
               Navigator.pop(context);
             },
           ),
-          title: Text(
-            'Reaffirmation',
+          title: const Text(
+            'Affirmation',
           ),
         ),
         body: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 child: Text(
                   'Pray the Salvation Prayer with the person(s) you are witnessing to.',
                   style: TextStyle(
@@ -49,12 +51,11 @@ class _ReaffirmationPageState extends State<ReaffirmationPage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => SalvationPrayerPage()));
+                            builder: (context) => const SalvationPrayerPage()));
                   },
-                  title: "Start With This Prayer"),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                  title: "Salvation Prayer"),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 child: Text(
                     'Pray the Rededication Prayer with the person(s) you are witnessing to.',
                     style: TextStyle(
@@ -67,12 +68,24 @@ class _ReaffirmationPageState extends State<ReaffirmationPage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => RededicationPrayerPage()));
+                            builder: (context) =>
+                                const RededicationPrayerPage()));
                   },
-                  title: "Start With This Prayer"),
+                  title: "Rededication/Out of Fellowship Prayer"),
               ContinueButton(onTapped: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => UserInfoPage()));
+                if (!(BlocProvider.of<UserBloc>(context).state.userExists ??
+                    false)) {
+                  showDialog(
+                      context: context,
+                      builder: (context) => const AccountRequiredDialog(
+                          title: "User Doesn't Exist",
+                          text: "Please create an account or login."));
+                } else {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const UserInfoPage(isExisting: false,)));
+                }
               })
             ],
           ),

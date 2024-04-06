@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class VerseListWidget extends StatelessWidget {
   final List<String> verses;
@@ -45,20 +42,20 @@ class VerseListWidget extends StatelessWidget {
                     size: 30,
                     color: Colors.grey[700],
                   ),
-                  SizedBox(width: 30,),
+                  const SizedBox(width: 30,),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [Text(title,style:TextStyle(color: Colors.black,fontSize: 18)), 
+                    children: [Text(title,style:const TextStyle(color: Colors.black,fontSize: 18)), 
                     SizedBox(
                       width: MediaQuery.of(context).size.width-160,
                       child: Text(_verseString(),style:TextStyle(color: Colors.grey[700],fontSize: 14,fontWeight: FontWeight.w600,overflow: TextOverflow.ellipsis)))],
                   ),
-                  Spacer(flex: 1,),
-                  Icon(Icons.navigate_next,color: Colors.grey,size: 40,)
+                  const Spacer(flex: 1,),
+                  const Icon(Icons.navigate_next,color: Colors.grey,size: 40,)
                 ],
               ),
             ),
-            Divider(
+            const Divider(
               color: Colors.grey,
               thickness: 1,
               indent: 12,

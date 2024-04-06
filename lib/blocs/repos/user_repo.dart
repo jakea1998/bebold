@@ -5,14 +5,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserRepo extends BaseUserRepo {
   FirebaseFirestore fs = FirebaseFirestore.instance;
   @override
-  Future<void> createUser({required UserModel user}) async{
+  Future<void> createUser({required UserModel user}) async {
     // TODO: implement createUser
     await fs.collection("Users").doc(user.userId).set(user.toJson());
   }
-  
+
   @override
   Stream<UserModel> loadUser({required String uid}) {
     // TODO: implement loadUser
-    return fs.collection("Users").doc(uid).snapshots().map((event) => UserModel.fromJson(event.data() ?? {}));
+    return fs
+        .collection("Users")
+        .doc(uid)
+        .snapshots()
+        .map((event) => UserModel.fromJson(event.data() ?? {}));
+  }
+
+  @override
+  Future<void> deleteUser({required UserModel user}) async{
+    // TODO: implement deleteUser
+    return await fs.collection("Users").doc(user.userId).delete();
+  }
+  
+  @override
+  Future<bool> handleAnonymousUser({required String uid})async{
+    // TODO: implement handleAnonymousUser
+    final result = await fs.collection("Users").doc(uid).get();
+    
+    return result.exists;
   }
 }

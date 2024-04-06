@@ -1,8 +1,7 @@
-import 'package:be_bold/ui/pages/witness_page.dart';
+import 'package:be_bold/ui/pages/witness_page/witness_page.dart';
 import 'package:be_bold/ui/widgets/home_tab_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+
 
 class HomeTab extends StatelessWidget {
   const HomeTab({Key? key}) : super(key: key);
@@ -10,7 +9,7 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Center(
           child: Column(
@@ -19,13 +18,13 @@ class HomeTab extends StatelessWidget {
               Image.asset(
                 'lib/assets/BeBOLD_Logo.png',
                 fit: BoxFit.fitHeight,
-                height: 150,
+                height: 180,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
-              Text(
-                'I Am Witnessing To A :',
+              const Text(
+                'I Am Witnessing To:',
                 style: TextStyle(
                     fontSize: 24,
                     color: Colors.black,
@@ -37,7 +36,7 @@ class HomeTab extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => WitnessPage(
+                            builder: (context) => const WitnessPage(
                                   title: "Acquaintance",
                                 )));
                   }),
@@ -45,7 +44,7 @@ class HomeTab extends StatelessWidget {
                  Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => WitnessPage(
+                            builder: (context) => const WitnessPage(
                                   title: "Family Member",
                                 )));
               }),
@@ -53,7 +52,7 @@ class HomeTab extends StatelessWidget {
                  Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => WitnessPage(
+                            builder: (context) => const WitnessPage(
                                   title: "Friend",
                                 )));
               }),
@@ -61,7 +60,7 @@ class HomeTab extends StatelessWidget {
                  Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => WitnessPage(
+                            builder: (context) => const WitnessPage(
                                   title: "New Connection",
                                 )));
               }),

@@ -16,6 +16,11 @@ class LivesChangedEventLoadLives extends LivesChangedEvent {
   // TODO: implement props
   List<Object?> get props => [];
 }
+class LivesChangedEventClearLives extends LivesChangedEvent {
+  @override
+  // TODO: implement props
+  List<Object?> get props => [];
+}
 class LivesChangedEventUpdateLives extends LivesChangedEvent {
   final List<UserModel> models;
   LivesChangedEventUpdateLives({required this.models});

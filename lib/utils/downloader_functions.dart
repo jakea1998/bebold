@@ -53,7 +53,6 @@ class DownloaderFunctions {
 
       final status = await Permission.storage.status;
       if (status == PermissionStatus.granted) {
-        
         return true;
       }
 
@@ -64,37 +63,42 @@ class DownloaderFunctions {
     throw StateError('unknown platform');
   }
 
-  static Future<void> requestDownload(
-      {required TaskInfo task,
+  static Future<String> requestDownload(
+      {required TaskInfo2 task,
       required String localPath,
       required bool saveInPublicStorage}) async {
     task.taskId = await FlutterDownloader.enqueue(
-      url: task.link!,
+      url: task.link,
       headers: {'auth': 'test_for_sql_encoding'},
       savedDir: localPath,
+      showNotification: false,
+      openFileFromNotification: false,
+      fileName: "${task.categoryName}${task.displayName}",
       saveInPublicStorage: saveInPublicStorage,
     );
+    return task.taskId ?? "";
   }
 
-  static Future<void> pauseDownload({required TaskInfo task}) async {
+  static Future<void> pauseDownload({required TaskInfo2 task}) async {
     await FlutterDownloader.pause(taskId: task.taskId!);
   }
 
   static Future<void> resumeDownload(
-      {required TaskInfo task, required BuildContext context}) async {
+      {required TaskInfo2 task, required BuildContext context}) async {
     final newTaskId = await FlutterDownloader.resume(taskId: task.taskId!);
 
     BlocProvider.of<AudioVideoBloc>(context).add(AudioVideoEventChangeTaskId(
         oldTaskId: task.taskId ?? "", newTaskId: newTaskId ?? ""));
   }
 
-  static Future<void> retryDownload({required TaskInfo task,required BuildContext context}) async {
+  static Future<void> retryDownload(
+      {required TaskInfo2 task, required BuildContext context}) async {
     final newTaskId = await FlutterDownloader.retry(taskId: task.taskId!);
     BlocProvider.of<AudioVideoBloc>(context).add(AudioVideoEventChangeTaskId(
         oldTaskId: task.taskId ?? "", newTaskId: newTaskId ?? ""));
   }
 
-  static Future<bool> openDownloadedFile(TaskInfo? task) async {
+  static Future<bool> openDownloadedFile(TaskInfo2? task) async {
     final taskId = task?.taskId;
     if (taskId == null) {
       return false;

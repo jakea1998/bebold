@@ -1,8 +1,6 @@
-import 'dart:io';
-
-import 'package:be_bold/blocs/audio_video/audio_video_bloc.dart';
 import 'package:be_bold/blocs/repos/base_audio_video_repo.dart';
-import 'package:be_bold/models/item_holder.dart';
+import 'package:be_bold/constants/enums.dart';
+
 import 'package:be_bold/models/task_info.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:be_bold/models/firebase_file.dart';
@@ -21,7 +19,7 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
     final ref = FirebaseStorage.instance.ref(path);
 
     final result = await ref.listAll();
-    print(result.items);
+
     final urls = await getDownloadLinks(refs: result.items);
 
     return urls
@@ -29,7 +27,8 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
         .map((index, url) {
           final ref = result.items[index];
           final name = ref.name;
-          final file = FirebaseFile(ref: ref, name: name, url: url);
+          final file =
+              FirebaseFile(ref: ref, name: name, url: url, subPath: path);
 
           return MapEntry(index, file);
         })
@@ -38,61 +37,94 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
   }
 
   @override
-  Future<List<ItemHolder>> loadLocalFiles(
-      {required List<FirebaseFile> audios,
-      required List<FirebaseFile> videos}) async {
-    // TODO: implement loadLocalFiles
+  Future<List<TaskInfo2>> loadLocalFilesConnected(
+      {required List<TaskInfo2> blankDownloads}) async {
     final tasks = await FlutterDownloader.loadTasks();
 
     if (tasks == null) {
-      print('No tasks were retrieved from the database.');
+      return blankDownloads;
+    }
+
+    for (var i = 0; i < blankDownloads.length; i++) {
+      try {
+        final matching_task = tasks.firstWhere(
+            (task_local) => task_local.url == blankDownloads[i].link);
+
+        blankDownloads[i]
+          ..taskId = matching_task.taskId
+          ..status = matching_task.status
+          ..filePath = "${matching_task.savedDir}/${matching_task.filename}"
+          ..progress = matching_task.progress;
+      } on StateError catch (e) {
+        print(e);
+      }
+    }
+
+    return blankDownloads;
+  }
+
+  @override
+  Future<List<TaskInfo2>> loadLocalFilesDisconnected({
+    required WitnessType witnessType,
+  }) async {
+    final tasks = await FlutterDownloader.loadTasks();
+
+    if (tasks == null) {
       return [];
     }
+    final List<TaskInfo2> _tasks = [];
+    for (var i = 0; i < tasks.length; i++) {
+      
+      final names = tasks[i].filename?.split("_");
+      final cat_name = names?[1];
 
-    var count = 0;
-    List<TaskInfo> _tasks = [];
-    List<ItemHolder> _items = [];
+      final matches_type =
+          matchesWitnessType(name: cat_name ?? "", type: witnessType);
+      final fullyDownloaded = tasks[i].status == DownloadTaskStatus.complete;
+      if (matches_type && fullyDownloaded) {
+        final task_cat_name = "${[names![0], cat_name].join("_")}_";
+        
+        TaskInfo2 task = TaskInfo2(
+            type: getItemType(item: names![0]),
+            displayName: names[2],
+            link: tasks[i].url,
+            categoryName: task_cat_name);
+        task
+          ..taskId = tasks[i].taskId
+          ..status = tasks[i].status
+          ..filePath = "${tasks[i].savedDir}/${tasks[i].filename}"
+          ..progress = tasks[i].progress;
 
-    _tasks.addAll(
-      audios.map(
-        (audio) => TaskInfo(name: audio.name, link: audio.url),
-      ),
-    );
-
-    
-    for (var i = count; i < _tasks.length; i++) {
-      _items.add(ItemHolder(
-          name: _tasks[i].name, task: _tasks[i], type: ItemType.Audio));
-      count++;
-    }
-
-    _tasks.addAll(
-      videos.map((video) => TaskInfo(name: video.name, link: video.url)),
-    );
-
-    
-    for (var i = count; i < _tasks.length; i++) {
-      _items.add(ItemHolder(
-          name: _tasks[i].name, task: _tasks[i], type: ItemType.Video));
-      count++;
-    }
-    tasks.forEach((element) {
-      if (element.status == DownloadTaskStatus.running) {
-        FlutterDownloader.resume(taskId: element.taskId);
-      }
-    });
-    for (final task in tasks) {
-      for (final info in _tasks) {
-        if (info.link == task.url) {
-          info
-            ..taskId = task.taskId
-            ..status = task.status
-            ..filePath = "${task.savedDir}/${task.filename}"
-            ..progress = task.progress;
-        }
+        _tasks.add(task);
       }
     }
+    return _tasks;
+  }
 
-    return _items;
+  bool matchesWitnessType({required String name, required WitnessType type}) {
+    switch (name) {
+      case "Acquaintance":
+        return type == WitnessType.acquaintance;
+
+      case "Family Member":
+        return type == WitnessType.familyMember;
+
+      case "Friend":
+        return type == WitnessType.friend;
+
+      case "New Connection":
+        return type == WitnessType.newConnection;
+
+      default:
+        return false;
+    }
+  }
+
+  ItemType getItemType({required String item}) {
+    return item == "audios"
+        ? ItemType.Audio
+        : item == "videos"
+            ? ItemType.Video
+            : ItemType.None;
   }
 }

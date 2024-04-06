@@ -1,13 +1,12 @@
 import 'package:be_bold/blocs/lives_changed/lives_changed_bloc.dart';
+import 'package:be_bold/blocs/user/user_bloc.dart';
 import 'package:be_bold/constants/colors.dart';
 import 'package:be_bold/models/user_model.dart';
-import 'package:be_bold/ui/pages/personal_info_page.dart';
-import 'package:be_bold/ui/pages/reaffirmation_page.dart';
 import 'package:be_bold/ui/pages/user_info_page.dart';
+import 'package:be_bold/ui/widgets/account_required_dialog.dart';
 import 'package:be_bold/ui/widgets/lives_changed_list_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LivesChangedTab extends StatefulWidget {
@@ -23,7 +22,7 @@ class _LivesChangedTabState extends State<LivesChangedTab> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Container(
+        child: SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: Column(
@@ -34,40 +33,49 @@ class _LivesChangedTabState extends State<LivesChangedTab> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
+                          if(BlocProvider.of<UserBloc>(context).state.userExists ?? false){
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => UserInfoPage()));
+                                  builder: (context) => const UserInfoPage(isExisting: false,)));
+                          } else {
+                            showDialog(
+                        context: context,
+                        builder: (context) => const AccountRequiredDialog(
+                            title: "User Doesn't Exist",
+                            text: "Please create an account or login."));
+                          }
+                          
                         },
                         child: Container(
                           width: buttonDiameter,
                           height: buttonDiameter,
-                          child: Center(
-                              child: Icon(Icons.add,
-                                  size: 70, color: darkBlueColor1)),
                           decoration: BoxDecoration(
-                              border: Border.fromBorderSide(
+                              border: const Border.fromBorderSide(
                                   BorderSide(color: darkBlueColor1, width: 3)),
                               borderRadius:
                                   BorderRadius.circular(buttonDiameter / 2)),
+                          child: const Center(
+                              child: Icon(Icons.add,
+                                  size: 70, color: darkBlueColor1)),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 7,
                       ),
-                      Text(
+                      const Text(
                         'Create New',
                         style: TextStyle(color: darkBlueColor1, fontSize: 20),
                       )
                     ],
                   ),
                 ),
-                Row(
+                const Row(
                   children: [
                     Padding(
                       padding: EdgeInsets.all(12),
                       child: Text(
-                        "Lives Changed :",
+                        "Lives Changed:",
                         style: TextStyle(
                             fontSize: 20,
                             color: Colors.black,
@@ -79,13 +87,13 @@ class _LivesChangedTabState extends State<LivesChangedTab> {
                     )
                   ],
                 ),
-                 Divider(
-                              color: Colors.black,
-                            ),
+                const Divider(
+                  color: Colors.black,
+                ),
                 Expanded(
                   child: BlocBuilder<LivesChangedBloc, LivesChangedState>(
                     builder: (context, state) {
-                      if ((state.models?.length ?? 0) > 0)
+                      if ((state.models?.length ?? 0) > 0) {
                         return ListView.builder(
                           itemCount: state.models?.length,
                           itemBuilder: ((context, index) {
@@ -93,17 +101,16 @@ class _LivesChangedTabState extends State<LivesChangedTab> {
                                 userModel: state.models?[index] ?? UserModel());
                           }),
                         );
-                      else
-                        return Container(
-                            child: Column(
+                      } else {
+                        return  const Column(
                           children: [
-                           
                             Padding(
                               padding: EdgeInsets.all(8),
                               child: Text('No Lives Changed yet!'),
                             )
                           ],
-                        ));
+                        );
+                      }
                     },
                   ),
                 )
