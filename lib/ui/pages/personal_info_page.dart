@@ -8,6 +8,7 @@ import 'package:be_bold/ui/widgets/info_pages/email_box.dart';
 import 'package:be_bold/ui/widgets/info_pages/first_last_name_box.dart';
 import 'package:be_bold/ui/widgets/info_pages/notes_box.dart';
 import 'package:be_bold/ui/widgets/info_pages/phone_box.dart';
+import 'package:be_bold/ui/widgets/info_pages/subscribe_to_newsletter.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -195,63 +196,13 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       phoneController: phoneController),
                   EmailBox(email: emailController.text),
                   NotesBox(notesController: notesController,notesNode: notesNode,editPressed: editPressed,height: 150,),
-                  /* Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
-                      style: const TextStyle(color: Colors.grey, fontSize: 16),
-                      textInputAction: TextInputAction.done,
-                      decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.all(10),
-                          hintText: "NOTES",
-                          hintStyle: const TextStyle(color: Colors.orange),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          labelStyle: const TextStyle(color: Colors.orange),
-                          enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey,
-                            ),
-                            // borderRadius: BorderRadius.circular(30)),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.grey[500] ?? Colors.grey,
-                            ),
-                          )),
-                      controller: notesController,
-                      focusNode: notesNode,
-                      enabled: true,
-                      obscureText: false,
-                      maxLines: 5,
-                    ),
-                  ), */
-                  Row(children: [
-                    signUpForNewsLetter
-                        ? IconButton(
-                            icon: const Icon(
-                              Icons.check_circle,
-                              color: darkBlueColor1,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                signUpForNewsLetter = false;
-                              });
-                            })
-                        : IconButton(
-                            icon: const Icon(
-                              Icons.circle_outlined,
-                              color: Colors.black,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                signUpForNewsLetter = true;
-                              });
-                            }),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    const Text("Sign Up For News Letter")
-                  ]),
+                  
+                  NewsletterSubscriptionBox(editPressed: editPressed, subscribed: signUpForNewsLetter, onTap: (subscribe){
+                    setState(() {
+                      signUpForNewsLetter = !subscribe;
+                    });
+                  })
+                  
                 ],
               ),
             ),

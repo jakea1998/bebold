@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:be_bold/blocs/lives_changed/lives_changed_bloc.dart';
 import 'package:be_bold/blocs/user/user_bloc.dart';
 import 'package:be_bold/constants/colors.dart';
@@ -13,6 +16,7 @@ import 'package:be_bold/ui/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    
     BlocProvider.of<UserBloc>(context).add(UserEventLoadUser(
         livesChangedBloc: BlocProvider.of<LivesChangedBloc>(context)));
 
@@ -63,7 +67,7 @@ class _HomePageState extends State<HomePage> {
           },
         )),
         body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 50),
           child: _buildBody(navIndex),
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -100,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                   label: "List"),
               BottomNavigationBarItem(
                   icon: Icon(
-                   Bootstrap.receipt,
+                    Bootstrap.receipt,
                     color: Colors.white,
                   ),
                   label: "Report"),

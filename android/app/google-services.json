@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:696023446009:android:7acb037cfc9776fd304d28",
+        "mobilesdk_app_id": "1:696023446009:android:c43e0e9832a22613304d28",
         "android_client_info": {
-          "package_name": "com.mariediggs.bebold"
+          "package_name": "com.mariediggsministries.beboldforjesus"
         }
       },
       "oauth_client": [

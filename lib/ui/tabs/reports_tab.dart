@@ -137,6 +137,26 @@ class _ReportsTabState extends State<ReportsTab> {
                                       state.startDate ?? DateTime.now(),
                                   currentDate: DateTime.now(),
                                   firstDate: DateTime(1970, 1, 1),
+                                  builder: (context,child){
+                                    
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: darkBlueColor1, // header background color
+              onPrimary: Colors.white, 
+              onPrimaryContainer: Colors.white,// header text color
+              surfaceTint: Colors.transparent,
+              onSurface: Colors.black, // body text color
+              surface: Colors.white,
+              
+            ),
+            dialogBackgroundColor: Colors.white,
+            
+          ),
+          child: child!,
+        );
+      
+                                  },
                                   lastDate: DateTime(2070, 1, 1));
                               BlocProvider.of<ReportsBloc>(context).add(
                                   ReportsEventUpdateDate(
@@ -169,6 +189,26 @@ class _ReportsTabState extends State<ReportsTab> {
                                   context: context,
                                   initialDate: state.endDate ?? DateTime.now(),
                                   currentDate: DateTime.now(),
+                                  builder: (context,child){
+                                    
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: darkBlueColor1, // header background color
+              onPrimary: Colors.white, 
+              onPrimaryContainer: Colors.white,// header text color
+              surfaceTint: Colors.transparent,
+              onSurface: Colors.black, // body text color
+              surface: Colors.white,
+              
+            ),
+            dialogBackgroundColor: Colors.white,
+            
+          ),
+          child: child!,
+        );
+      
+                                  },
                                   firstDate: DateTime(1970, 1, 1),
                                   lastDate: DateTime(2070, 1, 1));
 

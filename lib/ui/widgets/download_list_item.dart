@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
@@ -28,22 +27,22 @@ class DownloadListItem extends StatelessWidget {
     if (task.status == DownloadTaskStatus.undefined) {
       return IconButton(
         onPressed: () => onActionTap?.call(task),
+        splashRadius: 2,
         constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
         icon: const Icon(Icons.file_download),
         tooltip: 'Start',
       );
     } else if (task.status == DownloadTaskStatus.running) {
-      return Row(
-        children: [
-          Text('${task.progress}%'),
-          /* IconButton(
+      return Center(
+        child: Text('${task.progress}%',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      );
+      /* IconButton(
             onPressed: () => onActionTap?.call(task),
             constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
             icon: const Icon(Icons.pause, color: Colors.yellow),
             tooltip: 'Pause',
           ), */
-        ],
-      );
     } else if (task.status == DownloadTaskStatus.paused) {
       return Row(
         children: [
@@ -132,13 +131,21 @@ class DownloadListItem extends StatelessWidget {
             size: 30,
           )),
         ),
-        title: Text(data.displayName.replaceAll('.mp4', "").replaceAll('.mp3', ""),
-            maxLines: 1, softWrap: true, overflow: TextOverflow.ellipsis),
+        title: Text(
+            data.displayName.replaceAll('.mp4', "").replaceAll('.mp3', ""),
+            maxLines: 1,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis),
         trailing: SizedBox(
             width: 100,
             child: Row(
               children: [
-                connectedToInternet ? SizedBox(width: 80, child: _buildTrailing(data) ?? Container()): const SizedBox(width: 80,),
+                connectedToInternet
+                    ? SizedBox(
+                        width: 80, child: _buildTrailing(data) ?? Container())
+                    : const SizedBox(
+                        width: 80,
+                      ),
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 20,
@@ -157,8 +164,8 @@ class DownloadListItem extends StatelessWidget {
           color: Colors.grey,
         ),
       ),
-      if ((data.status == DownloadTaskStatus.running  && connectedToInternet) ||
-          (data.status == DownloadTaskStatus.paused&& connectedToInternet))
+      if ((data.status == DownloadTaskStatus.running && connectedToInternet) ||
+          (data.status == DownloadTaskStatus.paused && connectedToInternet))
         Positioned(
           left: 0,
           right: 0,
@@ -167,6 +174,7 @@ class DownloadListItem extends StatelessWidget {
             width: MediaQuery.of(context).size.width,
             child: LinearProgressIndicator(
               minHeight: 5,
+              valueColor: const AlwaysStoppedAnimation(Colors.blue),
               value: data.progress! / 100,
             ),
           ),

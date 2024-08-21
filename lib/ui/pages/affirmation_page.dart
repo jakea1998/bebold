@@ -29,8 +29,10 @@ class _AffirmationPageState extends State<AffirmationPage> {
               Navigator.pop(context);
             },
           ),
+          centerTitle: true,
           title: const Text(
             'Affirmation',
+            style: TextStyle(color: Colors.white),
           ),
         ),
         body: SafeArea(

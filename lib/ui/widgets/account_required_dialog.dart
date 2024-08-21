@@ -21,8 +21,11 @@ class AccountRequiredDialog extends StatelessWidget {
           actions: [
             GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const RegistrationPage()));
+                
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const RegistrationPage()));
               },
               child: Card(
                 elevation: 2,
@@ -48,6 +51,7 @@ class AccountRequiredDialog extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
+                
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => LoginPage()));
               },

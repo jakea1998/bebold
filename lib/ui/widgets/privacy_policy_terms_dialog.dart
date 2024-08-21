@@ -1,3 +1,4 @@
+import 'package:be_bold/constants/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -19,7 +20,7 @@ class PrivacyTermsDialog extends StatelessWidget {
         GestureDetector(
               onTap: () async{
                 await launchUrlString(
-                      "https://marie736.wixsite.com/beboldforjesus/privacy-policy");
+                      privacy_policy);
               },
               child: Card(
                 elevation: 2,
@@ -48,7 +49,7 @@ class PrivacyTermsDialog extends StatelessWidget {
                  
                   
                   await launchUrlString(
-                      "https://marie736.wixsite.com/beboldforjesus/copy-of-privacy-policy");
+                      terms_of_service);
                 
               },
               child: Card(

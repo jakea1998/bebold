@@ -6,6 +6,12 @@ class VerseContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: const EdgeInsets.only(left:15,bottom: 0,top: 0),child: Text(content,style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w500),),);
+    return Padding(padding: 
+    const EdgeInsets.only(left:15,bottom: 0,top: 0,right:15),
+    child: Text(content,
+    style: const TextStyle(color:
+     Colors.black87,
+     fontSize: 16,
+     fontWeight: FontWeight.w500),),);
   }
 }

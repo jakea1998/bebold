@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.6+6
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
@@ -48,7 +48,7 @@ dependencies:
   just_audio: ^0.9.36
   perfect_volume_control: ^1.0.5
   uuid: ^3.0.6
-  video_player: ^2.4.7
+  video_player: ^2.8.6
   flutter_downloader: ^1.11.6
   video_thumbnail: ^0.5.3
   path_provider: ^2.0.11
@@ -57,13 +57,16 @@ dependencies:
   android_path_provider: ^0.3.0
 
   permission_handler: ^10.2.0
-  chewie: ^1.4.0
+  chewie: ^1.8.1
   device_info_plus: ^9.1.2
   loading_indicator: ^3.1.1
   getwidget: ^4.0.0
   provider: ^6.1.2
   icons_plus: ^5.0.0
   share_plus: ^8.0.2
+  firebase_core: ^2.29.0
+  flutter_native_splash: ^2.4.0
+  firebase_app_check: ^0.2.2+7
  
 
 
@@ -91,6 +94,9 @@ flutter_icons:
   image_path: "lib/assets/app-logo-be-bold.png"
   min_sdk_android: 21
 
+flutter_native_splash:
+  background_image: "lib/assets/LaunchScreen.png"
+  
 flutter:
 
   # The following line ensures that the Material Icons font is

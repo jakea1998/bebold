@@ -17,11 +17,8 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
   Future<List<FirebaseFile>> listAll({required String path}) async {
     // TODO: implement listAll
     final ref = FirebaseStorage.instance.ref(path);
-
     final result = await ref.listAll();
-
     final urls = await getDownloadLinks(refs: result.items);
-
     return urls
         .asMap()
         .map((index, url) {
@@ -55,6 +52,7 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
           ..status = matching_task.status
           ..filePath = "${matching_task.savedDir}/${matching_task.filename}"
           ..progress = matching_task.progress;
+        print(blankDownloads[i].filePath);
       } on StateError catch (e) {
         print(e);
       }
@@ -74,7 +72,6 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
     }
     final List<TaskInfo2> _tasks = [];
     for (var i = 0; i < tasks.length; i++) {
-      
       final names = tasks[i].filename?.split("_");
       final cat_name = names?[1];
 
@@ -83,7 +80,7 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
       final fullyDownloaded = tasks[i].status == DownloadTaskStatus.complete;
       if (matches_type && fullyDownloaded) {
         final task_cat_name = "${[names![0], cat_name].join("_")}_";
-        
+
         TaskInfo2 task = TaskInfo2(
             type: getItemType(item: names![0]),
             displayName: names[2],
@@ -123,7 +120,7 @@ class AudioVideoRepo extends BaseAudioVideoRepo {
   ItemType getItemType({required String item}) {
     return item == "audios"
         ? ItemType.Audio
-        : item == "videos"
+        : (item == "videos" || item == "androidvideos")
             ? ItemType.Video
             : ItemType.None;
   }

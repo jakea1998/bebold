@@ -9,7 +9,7 @@ class LivesChangedRepo extends BaseLivesChangedRepo {
   Future<void> addLifeChanged(
       {required UserModel user, required String uid}) async {
     // TODO: implement addLifeChanged
-    user.userId = Uuid().v1();
+    
     await fs
         .collection("LivesChanged")
         .doc(uid)
@@ -19,11 +19,27 @@ class LivesChangedRepo extends BaseLivesChangedRepo {
   }
 
   @override
+  Future<void> deleteLifeChanged(
+      {required UserModel user, required String uid}) async {
+    // TODO: implement addLifeChanged
+
+    await fs
+        .collection("LivesChanged")
+        .doc(uid)
+        .collection("PersonalLivesChanged")
+        .doc(user.userId)
+        .delete();
+  }
+
+  @override
   Stream<List<UserModel>> loadLivesChanged({required String uid}) {
     // TODO: implement loadLivesChanged
     return fs
         .collection("LivesChanged")
         .doc(uid)
-        .collection("PersonalLivesChanged").snapshots().map((event) => event.docs.map((e)=>UserModel.fromJson(e.data())).toList());
+        .collection("PersonalLivesChanged")
+        .snapshots()
+        .map((event) =>
+            event.docs.map((e) => UserModel.fromJson(e.data())).toList());
   }
 }

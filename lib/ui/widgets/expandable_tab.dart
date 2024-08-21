@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 class ExpandableTab extends StatefulWidget {
   final String title;
   final Widget body;
-  const ExpandableTab({Key? key, required this.title, required this.body})
+  final Color? color;
+  const ExpandableTab({Key? key,this.color = lightBlueColor1, required this.title, required this.body})
       : super(key: key);
 
   @override
@@ -16,7 +17,7 @@ class _ExpandableTabState extends State<ExpandableTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal:8.0,vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2),
       child: Column(
         children: [
           GestureDetector(
@@ -24,12 +25,11 @@ class _ExpandableTabState extends State<ExpandableTab> {
               setState(() {
                 isExpanded = !isExpanded;
               });
-              
             },
             child: Card(
               elevation: 3,
               child: Container(
-                color: lightBlueColor1,
+                color: widget.color,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
@@ -41,8 +41,10 @@ class _ExpandableTabState extends State<ExpandableTab> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      
-                      Icon(isExpanded ? Icons.remove : Icons.add,color: Colors.white,)
+                      Icon(
+                        isExpanded ? Icons.remove : Icons.add,
+                        color: Colors.white,
+                      )
                     ],
                   ),
                 ),
@@ -50,16 +52,17 @@ class _ExpandableTabState extends State<ExpandableTab> {
             ),
           ),
           AnimatedContainer(
-      duration: new Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      child: isExpanded ? Card(
-        elevation: 3,
-        child: Container(
-          decoration: BoxDecoration(border: Border.all(color: Colors.grey,width: 1)),
-          child: widget.body)) : Container(),
-    )
-  
-        
+            duration: new Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: isExpanded
+                ? Card(
+                    elevation: 3,
+                    child: Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey, width: 1)),
+                        child: widget.body))
+                : Container(),
+          )
         ],
       ),
     );

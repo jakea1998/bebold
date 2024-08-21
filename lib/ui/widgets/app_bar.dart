@@ -7,53 +7,65 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class AppBar1 extends StatelessWidget implements PreferredSizeWidget {
   final Widget leading;
   final String? title;
+  final double? titleHeight;
   final bool? showLogout;
   final PreferredSizeWidget? bottom;
-  const AppBar1({Key? key, required this.leading, this.title,this.showLogout = true, this.bottom})
+  const AppBar1(
+      {Key? key,
+      required this.leading,
+      this.title,
+      this.titleHeight,
+      this.showLogout = true,
+      this.bottom})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print("build");
     return AppBar(
       backgroundColor: darkBlueColor1,
       leading: leading,
       centerTitle: true,
       actions: [
-        showLogout?? true ? BlocBuilder<UserBloc, UserState>(
-          builder: (context, state) {
-            if (state.userStatus == UserStatus.loaded &&
-                (state.userExists ?? false)) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: Column(
-                  children: [
-                    const Spacer(
-                      flex: 1,
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        BlocProvider.of<UserBloc>(context).add(
-                            UserEventLogoutUser(
-                                livesChangedBloc:
-                                    BlocProvider.of<LivesChangedBloc>(
-                                        context)));
-                      },
-                      child: const Text(
-                        "Logout",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+        showLogout ?? true
+            ? BlocBuilder<UserBloc, UserState>(
+                builder: (context, state) {
+                  if (state.userStatus == UserStatus.loaded &&
+                      (state.userExists ?? false)) {
+                    print("user build");
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10.0),
+                      child: Column(
+                        children: [
+                          const Spacer(
+                            flex: 1,
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              BlocProvider.of<UserBloc>(context).add(
+                                  UserEventLogoutUser(
+                                      livesChangedBloc:
+                                          BlocProvider.of<LivesChangedBloc>(
+                                              context)));
+                            },
+                            child: const Text(
+                              "Logout",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                            ),
+                          ),
+                          const Spacer(
+                            flex: 1,
+                          ),
+                        ],
                       ),
-                    ),
-                    const Spacer(
-                      flex: 1,
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              return Container();
-            }
-          },
-        ) : Container()
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              )
+            : Container()
       ],
       bottom: bottom != null ? bottom : null,
       title: title == null
@@ -70,6 +82,7 @@ class AppBar1 extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   // TODO: implement preferredSize
-  Size get preferredSize =>
-      title != null ? const Size.fromHeight(85) : const Size.fromHeight(55);
+  Size get preferredSize => titleHeight != null
+      ? Size.fromHeight(titleHeight!)
+      : const Size.fromHeight(55);
 }

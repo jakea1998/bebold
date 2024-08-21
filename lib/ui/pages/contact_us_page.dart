@@ -26,6 +26,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
           ),
           title: const Text(
             'Contact Us',
+            style: TextStyle(color: Colors.white),
           ),
         ),
       body: SafeArea(child: Column(

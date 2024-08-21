@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mariediggs.bebold">
+    package="com.mariediggsministries.beboldforjesus">
    <application
-        android:label="be_bold"
+        android:label="Be Bold"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
        
@@ -13,6 +13,7 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:enableOnBackInvokedCallback="true"
             android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
@@ -43,6 +44,8 @@
                 android:resource="@xml/provider_paths"/>
             </provider>
     </application>
-   
+   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     
 </manifest>

@@ -24,6 +24,10 @@ class LivesChangedBloc extends Bloc<LivesChangedEvent, LivesChangedState> {
       await repo.addLifeChanged(
           user: event.model, uid: _auth.currentUser?.uid ?? "");
     });
+    on<LivesChangedEventDeleteLive>((event, emit) async {
+      await repo.deleteLifeChanged(
+          user: event.model, uid: _auth.currentUser?.uid ?? "");
+    });
     on<LivesChangedEventLoadLives>((event, emit) {
       try {
         if (livesChangedStream != null) livesChangedStream = null;
@@ -37,11 +41,14 @@ class LivesChangedBloc extends Bloc<LivesChangedEvent, LivesChangedState> {
       }
     });
     on<LivesChangedEventClearLives>((event, emit) {
-      if (livesChangedStream != null) livesChangedStream = null;
+      if (livesChangedStream != null) {
+        livesChangedStream?.cancel();
+        livesChangedStream = null;
+      }
+
       reportsBloc.add(const ReportsEventUpdateUsers(users: []));
 
-      emit(state.copyWith(
-          status: LivesChangedStatus.loaded, models: []));
+      emit(state.copyWith(status: LivesChangedStatus.loaded, models: []));
     });
     on<LivesChangedEventUpdateLives>((event, emit) {
       reportsBloc.add(ReportsEventUpdateUsers(users: event.models));

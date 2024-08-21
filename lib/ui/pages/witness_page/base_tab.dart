@@ -225,21 +225,18 @@ class BaseTabState extends State<BaseTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: BlocBuilder<AudioVideoBloc, AudioVideoState>(
-        builder: (context, state) {
-          return ListView(
-            children: [
-              _buildList(
-                  connectedToInternet: state.connectedToInternet ?? true,
-                  localFiles: widget.itemType == ItemType.Video
-                      ? state.localVideos ?? []
-                      : state.localAudios ?? [])
-            ],
-          );
-        },
-      ),
+    return BlocBuilder<AudioVideoBloc, AudioVideoState>(
+      builder: (context, state) {
+        return ListView(
+          children: [
+            _buildList(
+                connectedToInternet: state.connectedToInternet ?? true,
+                localFiles: widget.itemType == ItemType.Video
+                    ? state.localVideos ?? []
+                    : state.localAudios ?? [])
+          ],
+        );
+      },
     );
   }
 }

@@ -10,25 +10,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class MoreTab extends StatelessWidget {
   MoreTab({Key? key}) : super(key: key);
+
   final iconDatas = [
-    Icons.share_outlined,
+    //Icons.share_outlined,
     Icons.info_outline,
     Icons.phone_outlined,
     Icons.lock_outline,
-    MingCute.mail_open_line,
+    
     FontAwesome.trash_can
   ];
   final texts = [
-    "Share App",
+    //"Share App",
     "About Us",
     "Contact Us",
     "Privacy Policy and Terms",
-    "Newsletter Subscription",
+    
     "Delete Account"
   ];
   // set up the button
@@ -75,35 +74,28 @@ class MoreTab extends StatelessWidget {
             return MoreTabWidget(
                 iconData: iconDatas[index],
                 text: texts[index],
-                textColor: index == 4
-                    ? const Color(0xffa67c00)
-                    : index == 5
+                textColor: index == 3
                         ? Colors.red
                         : null,
                 onTapped: () async {
-                  if (index == 0) {
+                  /* if (index == 0) {
                     await _onShare(context);
-                  } else if (index == 1) {
+                  } else  */if (index ==0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => const AboutUsPage()));
-                  } else if (index == 2) {
+                  } else if (index == 1) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => const ContactUsPage()));
-                  } else if (index == 3) {
+                  } else if (index == 2) {
                     showDialog(
                         context: context,
                         builder: (context) => const PrivacyTermsDialog());
-                  } else if (index == 4) {
-                    if (await canLaunchUrlString(
-                        "https://www.mariediggsministries.com/newsletter")) {
-                      await launchUrlString(
-                          "https://www.mariediggsministries.com/newsletter");
-                    }
-                  } else if (index == 5) {
+                  
+                  } else if (index == 3) {
                     showDialog(
                         context: context,
                         builder: (context) => getDeleteAccountDialog(context));
@@ -113,7 +105,7 @@ class MoreTab extends StatelessWidget {
         },
         itemCount:
             (BlocProvider.of<UserBloc>(context).state.userExists ?? false)
-                ? 6
-                : 5);
+                ? 4
+                : 3);
   }
 }

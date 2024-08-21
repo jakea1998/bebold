@@ -30,18 +30,24 @@ class UserBloc extends Bloc<UserEvent, UserState> {
             .listen((event) {
           add(UserEventUpdateUser(userModel: event));
         });
+        print("load user");
         event.livesChangedBloc.add(LivesChangedEventLoadLives());
       }
     });
     on<UserEventUpdateUser>((event, emit) {
       emit(state.copyWith(
-          userModel: event.userModel, userExists: _auth.currentUser != null,userStatus: UserStatus.loaded));
+          userModel: event.userModel,
+          userExists: _auth.currentUser != null,
+          userStatus: UserStatus.loaded));
     });
     on<UserEventLogoutUser>((event, emit) async {
-      emit(state.copyWith(userStatus: UserStatus.loading));
+      //emit(state.copyWith(userStatus: UserStatus.loading));
       try {
-        await _auth.signOut();
         event.livesChangedBloc.add(LivesChangedEventClearLives());
+        _stream?.cancel();
+        _stream = null;
+        await _auth.signOut();
+        print("log out");
         emit(state.copyWith(
             userStatus: UserStatus.loaded,
             userExists: false,

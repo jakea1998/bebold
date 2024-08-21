@@ -17,8 +17,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-
-
 class WitnessPage extends StatefulWidget {
   final String title;
   const WitnessPage({Key? key, required this.title}) : super(key: key);
@@ -34,7 +32,6 @@ class _WitnessPageState extends State<WitnessPage>
   final ReceivePort _port = ReceivePort();
   @override
   void initState() {
-    
     super.initState();
     initPort();
     type = WitnessType.acquaintance;
@@ -70,15 +67,14 @@ class _WitnessPageState extends State<WitnessPage>
       return;
     }
     _port.listen((dynamic data) {
-      
       final taskId = (data as List<dynamic>)[0] as String;
       final status = DownloadTaskStatus.fromInt(data[1]);
       final progress = data[2] as int;
 
-      print(
+      /* print(
         'Callback on UI isolate: '
         'task ($taskId) is in status ($status) and process ($progress)',
-      );
+      );  */
 
       BlocProvider.of<AudioVideoBloc>(context).add(
           AudioVideoEventUpdateLocalAudiosVideos(
@@ -102,8 +98,6 @@ class _WitnessPageState extends State<WitnessPage>
   Widget build(BuildContext context) {
     return BlocListener<AudioVideoBloc, AudioVideoState>(
       listener: (context, state) {
-        
-
         if (EasyLoading.isShow &&
             state.status != VerseAudioVideoStatus.loading) {
           EasyLoading.dismiss();
@@ -112,6 +106,8 @@ class _WitnessPageState extends State<WitnessPage>
       child: Scaffold(
         appBar: AppBar1(
           title: widget.title,
+          titleHeight: 85,
+          showLogout: false,
           bottom: PreferredSize(
             preferredSize: Size(MediaQuery.of(context).size.width, 50),
             child: AppTabBar(
@@ -139,7 +135,7 @@ class _WitnessPageState extends State<WitnessPage>
             physics: const NeverScrollableScrollPhysics(),
             controller: tabBarController,
             children: [
-              const VerseTab(),
+              VerseTab(),
               BaseTab(
                 witnessCategory: widget.title,
                 witnessType: type,
@@ -159,8 +155,8 @@ class _WitnessPageState extends State<WitnessPage>
 }
 
 class VerseTab extends StatelessWidget {
-  const VerseTab({Key? key}) : super(key: key);
-
+  VerseTab({Key? key}) : super(key: key);
+  final _controller = ScrollController();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -180,243 +176,249 @@ class VerseTab extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: ListView(
-            children: [
-              VerseListWidget(
-                onTapped: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const VersePage(
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      VerseTitle(title: "Romans 5:12"),
-                                      VerseContent(
-                                          content:
-                                              "Wherefore, as by one man sin entered into the world, and death by sin; and so death passed upon all men, for that all have sinned."),
-                                      VerseTitle(
-                                          title: "Scriptural Enlightenment:"),
-                                      VerseContent(
-                                          content:
-                                              "Adam was the first man created by God.  He had God's nature.  When he disobeyed God in the garden, he missed the mark or sinned.  As a result, he lost God's nature and received the nature of sin.  Therefore, everyone born after him had his nature: a sin nature.  Sin led to spiritual death, and death passed from Adam to all mankind through his bloodline."),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      VerseTitle(title: "Romans 3:23"),
-                                      VerseContent(
-                                          content:
-                                              "For all have sinned, and come short of the glory of God."),
-                                      VerseTitle(
-                                          title: "Scriptural Enlightenment:"),
-                                      VerseContent(
-                                          content:
-                                              "Adam's decision to disobey God caused everyone to be born in sin and therefore made a sinner.  Thus sin caused everyone to lack or be deficient in obtaining the glory of God.  Only Jesus paying the price for mankind's sin, with His life and blood, could position mankind to be at peace and in oneness with God again.")
-                                    ]),
-                              )));
-                },
-                title: 'The Sin Issue',
-                verses: const ["Romans 5:12", "Romans 3:23"],
-              ),
-              VerseListWidget(
-                onTapped: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const VersePage(
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      VerseTitle(title: "St. John 3:16"),
-                                      VerseContent(
-                                          content:
-                                              "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."),
-                                      VerseTitle(
-                                          title: "Scriptural Enlightenment:"),
-                                      VerseContent(
-                                          content:
-                                              "God's undying, unwavering, and unfailing love for His creation caused Him to implement a plan to bring mankind back to Himself.  His plan cost Him His only Son, Jesus.  Nevertheless, He decided to give us His only Son.  His Son was without sin, but through obedience to God, He became sin so that we might receive a new nature: the nature of God.  With a new nature, we don't die; we receive everlasting life.  God asks us to have faith in His Son, Jesus, because He does not want us to perish or die; rather, He wants us to live eternally with Him."),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      VerseTitle(title: "Romans 6:23"),
-                                      VerseContent(
-                                          content:
-                                              "For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord."),
-                                      VerseTitle(
-                                          title: "Scriptural Enlightenment:"),
-                                      VerseContent(
-                                          content:
-                                              "At the end of every act of sin is a payment for the sin committed.  Sin always leads to death.  God released us from the payment of sin by giving us the gift of Jesus.  However, to reject the gift of Jesus is to keep the nature of sin.  The nature of sin is death, but receiving Jesus gives us eternal life.  Jesus is... God's gift to the world!"),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      VerseTitle(title: "Romans 5:8"),
-                                      VerseContent(
-                                          content:
-                                              "But God commandeth his love toward us, in that, while we were yet sinners, Christ died for us."),
-                                      VerseTitle(
-                                          title: "Scriptural Enlightenment:"),
-                                      VerseContent(
-                                          content:
-                                              "God introduced His love toward mankind by sending Jesus Christ to be our payment for sin.  When Jesus Christ died on the cross, he paid the price for mankind's sin.  He gave Himself as a sacrifice so that we might have a nature free of sin.")
-                                    ]),
-                              )));
-                },
-                title: 'The Rescue',
-                verses: const ["St. John 3:16", "Romans 6:23", "Romans 5:8"],
-              ),
-              VerseListWidget(
-                onTapped: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const VersePage(
+          child: Scrollbar(
+            controller: _controller,
+            thickness: 6,
+            thumbVisibility: true,
+            child: ListView(
+              controller: _controller,
+              children: [
+                VerseListWidget(
+                  onTapped: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VersePage(
                                   child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  VerseTitle(title: "Acts 4:12"),
-                                  VerseContent(
-                                      content:
-                                          "Neither is their salvation in any other: for there is none other name under heaven given among men, whereby we must be saved."),
-                                  VerseTitle(
-                                      title: "Scriptural Enlightenment:"),
-                                  VerseContent(
-                                      content:
-                                          "Because Jesus is the sinless sacrifice who paid for our sins, His name is the only name by which mankind can be saved.  When someone is saved, they receive the free gifts of deliverance, protection, healing, and preservation.  They receive well-being, and they are made whole."),
-                                  SizedBox(
-                                    height: 15,
-                                  ),
-                                  VerseTitle(title: "1 Peter 3:18"),
-                                  VerseContent(
-                                      content:
-                                          "For Christ also hath once suffered for our sins, the just for the unjust, that he might bring us to God, being put to death in the flesh, but quickened by the Spirit."),
-                                  VerseTitle(
-                                      title: "Scriptural Enlightenment:"),
-                                  VerseContent(
-                                      content:
-                                          "Jesus was innocent; yet, He suffered for the unrighteous.  Jesus was sinless; yet, He became sin to free us from it.  He was put to death on the cross of Calvary and went to Hell in our place to pay for mankind's sin.  However, He did not remain in Hell.  The Holy Spirit entered Hell on the third day and caused Jesus to be made alive.  At that time, Jesus defeated Satan in Hell and stripped him of all authority and power.  When someone receives Jesus Christ in their heart they are no longer separated from God but brought back into right standing and fellowship with God."),
-                                ],
-                              ))));
-                },
-                title: 'The Savior',
-                verses: const ["Acts 4:12", "1 Peter 3:18"],
-              ),
-              VerseListWidget(
-                onTapped: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const VersePage(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        VerseTitle(title: "Romans 5:12"),
+                                        VerseContent(
+                                            content:
+                                                "Wherefore, as by one man sin entered into the world, and death by sin; and so death passed upon all men, for that all have sinned."),
+                                        VerseTitle(
+                                            title: "Scriptural Enlightenment:"),
+                                        VerseContent(
+                                            content:
+                                                "Adam was the first man created by God.  He had God's nature.  When he disobeyed God in the garden, he missed the mark or sinned.  As a result, he lost God's nature and received the nature of sin.  Therefore, everyone born after him had his nature: a sin nature.  Sin led to spiritual death, and death passed from Adam to all mankind through his bloodline."),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        VerseTitle(title: "Romans 3:23"),
+                                        VerseContent(
+                                            content:
+                                                "For all have sinned, and come short of the glory of God."),
+                                        VerseTitle(
+                                            title: "Scriptural Enlightenment:"),
+                                        VerseContent(
+                                            content:
+                                                "Adam's decision to disobey God caused everyone to be born in sin and therefore made a sinner.  Thus sin caused everyone to lack or be deficient in obtaining the glory of God.  Only Jesus paying the price for mankind's sin, with His life and blood, could position mankind to be at peace and in oneness with God again.")
+                                      ]),
+                                )));
+                  },
+                  title: 'The Sin Issue',
+                  verses: const ["Romans 5:12", "Romans 3:23"],
+                ),
+                VerseListWidget(
+                  onTapped: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VersePage(
                                   child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  VerseTitle(title: "Romans 10:9-10, 13"),
-                                  VerseContent(
-                                      content:
-                                          "That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved.  For with the heart man believeth unto righteousness; and with the mouth confession is made unto salvation.  For whosoever shall call upon the name of the Lord shall be saved."),
-                                  VerseTitle(
-                                      title: "Scriptural Enlightenment:"),
-                                  VerseContent(
-                                      content:
-                                          "Salvation is as close as our hearts and our mouths.  When someone acknowledges with their mouth that Jesus is the only Lord, and believes in their heart that God has raised Jesus from the dead, this person receives the salvation purchased by Jesus for them.  The person literally at that time receives deliverance, protection, healing, and preservation.  They are made whole from sin.\n\nAll of this happens through an exchange.  Jesus took our sin and we take His righteousness or right standing with God.  God no longer sees us in sin; He sees us with the shed blood of His Son.\n\nWOW! That's a lot to receive, and all we had do was believe it and take it!"),
-                                ],
-                              ))));
-                },
-                title: 'The New You',
-                verses: const ["Romans 10:9-10, 13"],
-              ),
-              VerseListWidget(
-                onTapped: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const VersePage(
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      VerseTitle(title: "Ephesians 2:8-9"),
-                                      VerseContent(
-                                          content:
-                                              "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast."),
-                                      VerseTitle(
-                                          title: "Scriptural Enlightenment:"),
-                                      VerseContent(
-                                          content:
-                                              "God's grace provides deliverance, protection, preservation, salvation, healing and well-being, and it makes us whole.  God's grace is something that cannot be earned or bought.  He chose to give it to us.  When we receive His grace by faith, we activate all that God's grace has provided.  Our faith takes it!  Therefore, we cannot buy salvation nor can we work to be saved.  Salvation is a gift; no one can take credit for what they did not do."),
-                                    ]),
-                              )));
-                },
-                title: 'The Gift',
-                verses: const ["Ephesians 2:8-9"],
-              ),
-              VerseListWidget(
-                onTapped: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const VersePage(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        VerseTitle(title: "St. John 3:16"),
+                                        VerseContent(
+                                            content:
+                                                "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."),
+                                        VerseTitle(
+                                            title: "Scriptural Enlightenment:"),
+                                        VerseContent(
+                                            content:
+                                                "God's undying, unwavering, and unfailing love for His creation caused Him to implement a plan to bring mankind back to Himself.  His plan cost Him His only Son, Jesus.  Nevertheless, He decided to give us His only Son.  His Son was without sin, but through obedience to God, He became sin so that we might receive a new nature: the nature of God.  With a new nature, we don't die; we receive everlasting life.  God asks us to have faith in His Son, Jesus, because He does not want us to perish or die; rather, He wants us to live eternally with Him."),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        VerseTitle(title: "Romans 6:23"),
+                                        VerseContent(
+                                            content:
+                                                "For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord."),
+                                        VerseTitle(
+                                            title: "Scriptural Enlightenment:"),
+                                        VerseContent(
+                                            content:
+                                                "At the end of every act of sin is a payment for the sin committed.  Sin always leads to death.  God released us from the payment of sin by giving us the gift of Jesus.  However, to reject the gift of Jesus is to keep the nature of sin.  The nature of sin is death, but receiving Jesus gives us eternal life.  Jesus is... God's gift to the world!"),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        VerseTitle(title: "Romans 5:8"),
+                                        VerseContent(
+                                            content:
+                                                "But God commandeth his love toward us, in that, while we were yet sinners, Christ died for us."),
+                                        VerseTitle(
+                                            title: "Scriptural Enlightenment:"),
+                                        VerseContent(
+                                            content:
+                                                "God introduced His love toward mankind by sending Jesus Christ to be our payment for sin.  When Jesus Christ died on the cross, he paid the price for mankind's sin.  He gave Himself as a sacrifice so that we might have a nature free of sin.")
+                                      ]),
+                                )));
+                  },
+                  title: 'The Rescue',
+                  verses: const ["St. John 3:16", "Romans 6:23", "Romans 5:8"],
+                ),
+                VerseListWidget(
+                  onTapped: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VersePage(
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    VerseTitle(title: "Acts 4:12"),
+                                    VerseContent(
+                                        content:
+                                            "Neither is their salvation in any other: for there is none other name under heaven given among men, whereby we must be saved."),
+                                    VerseTitle(
+                                        title: "Scriptural Enlightenment:"),
+                                    VerseContent(
+                                        content:
+                                            "Because Jesus is the sinless sacrifice who paid for our sins, His name is the only name by which mankind can be saved.  When someone is saved, they receive the free gifts of deliverance, protection, healing, and preservation.  They receive well-being, and they are made whole."),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    VerseTitle(title: "1 Peter 3:18"),
+                                    VerseContent(
+                                        content:
+                                            "For Christ also hath once suffered for our sins, the just for the unjust, that he might bring us to God, being put to death in the flesh, but quickened by the Spirit."),
+                                    VerseTitle(
+                                        title: "Scriptural Enlightenment:"),
+                                    VerseContent(
+                                        content:
+                                            "Jesus was innocent; yet, He suffered for the unrighteous.  Jesus was sinless; yet, He became sin to free us from it.  He was put to death on the cross of Calvary and went to Hell in our place to pay for mankind's sin.  However, He did not remain in Hell.  The Holy Spirit entered Hell on the third day and caused Jesus to be made alive.  At that time, Jesus defeated Satan in Hell and stripped him of all authority and power.  When someone receives Jesus Christ in their heart they are no longer separated from God but brought back into right standing and fellowship with God."),
+                                  ],
+                                ))));
+                  },
+                  title: 'The Savior',
+                  verses: const ["Acts 4:12", "1 Peter 3:18"],
+                ),
+                VerseListWidget(
+                  onTapped: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VersePage(
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    VerseTitle(title: "Romans 10:9-10, 13"),
+                                    VerseContent(
+                                        content:
+                                            "That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved.  For with the heart man believeth unto righteousness; and with the mouth confession is made unto salvation.  For whosoever shall call upon the name of the Lord shall be saved."),
+                                    VerseTitle(
+                                        title: "Scriptural Enlightenment:"),
+                                    VerseContent(
+                                        content:
+                                            "Salvation is as close as our hearts and our mouths.  When someone acknowledges with their mouth that Jesus is the only Lord, and believes in their heart that God has raised Jesus from the dead, this person receives the salvation purchased by Jesus for them.  The person literally at that time receives deliverance, protection, healing, and preservation.  They are made whole from sin.\n\nAll of this happens through an exchange.  Jesus took our sin and we take His righteousness or right standing with God.  God no longer sees us in sin; He sees us with the shed blood of His Son.\n\nWOW! That's a lot to receive, and all we had do was believe it and take it!"),
+                                  ],
+                                ))));
+                  },
+                  title: 'The New You',
+                  verses: const ["Romans 10:9-10, 13"],
+                ),
+                VerseListWidget(
+                  onTapped: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VersePage(
                                   child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  VerseTitle(title: "St. John 1:12"),
-                                  VerseContent(
-                                      content:
-                                          "But as many as received him, to them gave he power to become the sons of God, even to them that believe on His name."),
-                                  VerseTitle(
-                                      title: "Scriptural Enlightenment:"),
-                                  VerseContent(
-                                      content:
-                                          "To those who believe in and receive Jesus as their Lord and Savior, He gives them the privilege and ability to become sons and daughters of God.  Whoever receives Him receives a new nature: the nature of God.  Thereby, they become sons and daughters of God and receive the full benefits of being in God's Family.\n\nWhenever someone enters God's family, they enter a relationship with Him.  God desires to spend time with His children just as people spend time with their spouses, children, family, and friends.  They spend time in their presence talking with them or listening to them.\n\nGod wants that same kind of time devoted to Him; he wants you to develop a relationship with Him.  Take the time to talk to Him and share what's on your heart.  Also, listen on the inside for His voice.  He will guide you and help you throughout your life."),
-                                ],
-                              ))));
-                },
-                title: 'The Adoption',
-                verses: const ["St. John 1:12"],
-              ),
-              VerseListWidget(
-                onTapped: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const VersePage(
-                                  child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  VerseTitle(
-                                      title:
-                                          "Rededication/Out of Fellowship with God Scriptures:"),
-                                  VerseTitle(title: "1 John 1:9"),
-                                  VerseContent(
-                                      content:
-                                          "If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness."),
-                                  VerseTitle(
-                                      title: "Scriptural Enlightenment:"),
-                                  VerseContent(
-                                      content:
-                                          "Just because a person receives Jesus in their heart, doesn't mean they are perfect and will never sin again.  No one is perfect but Jesus.  Therefore, all believers will sin after they receive salvation.  The good news is that God is trustworthy and fair.  As we confess or acknowledge our sins with a repentant heart, God forsakes or omits our sins as if we never committed them.  The blood of Jesus, which was shed for our sins, cleanses us from it."),
-                                  SizedBox(
-                                    height: 15,
-                                  ),
-                                  VerseTitle(title: "1 John 2:1-2"),
-                                  VerseContent(
-                                      content:
-                                          "My little children, these things write I unto you, that ye sin not.  And if any man sin, we have an advocate with the Father, Jesus Christ the righteous: And he is the propitiation for our sins: and not for our's only but also for the sins of the whole world."),
-                                  VerseTitle(
-                                      title: "Scriptural Enlightenment:"),
-                                  VerseContent(
-                                      content:
-                                          "Just because Jesus has paid for all sin does not excuse His people to wilffully sin.  As children of God, we should not plan to sin; rather, we should strive not to sin.  Whenever we sin or miss the mark, we should know that Jesus acts as our advocate.  He becomes our atonement or compensation for our sins."),
-                                ],
-                              ))));
-                },
-                title: 'Rededication',
-                verses: const ["1 John 1:9"],
-              ),
-            ],
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        VerseTitle(title: "Ephesians 2:8-9"),
+                                        VerseContent(
+                                            content:
+                                                "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast."),
+                                        VerseTitle(
+                                            title: "Scriptural Enlightenment:"),
+                                        VerseContent(
+                                            content:
+                                                "God's grace provides deliverance, protection, preservation, salvation, healing and well-being, and it makes us whole.  God's grace is something that cannot be earned or bought.  He chose to give it to us.  When we receive His grace by faith, we activate all that God's grace has provided.  Our faith takes it!  Therefore, we cannot buy salvation nor can we work to be saved.  Salvation is a gift; no one can take credit for what they did not do."),
+                                      ]),
+                                )));
+                  },
+                  title: 'The Gift',
+                  verses: const ["Ephesians 2:8-9"],
+                ),
+                VerseListWidget(
+                  onTapped: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VersePage(
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    VerseTitle(title: "St. John 1:12"),
+                                    VerseContent(
+                                        content:
+                                            "But as many as received him, to them gave he power to become the sons of God, even to them that believe on His name."),
+                                    VerseTitle(
+                                        title: "Scriptural Enlightenment:"),
+                                    VerseContent(
+                                        content:
+                                            "To those who believe in and receive Jesus as their Lord and Savior, He gives them the privilege and ability to become sons and daughters of God.  Whoever receives Him receives a new nature: the nature of God.  Thereby, they become sons and daughters of God and receive the full benefits of being in God's Family.\n\nWhenever someone enters God's family, they enter a relationship with Him.  God desires to spend time with His children just as people spend time with their spouses, children, family, and friends.  They spend time in their presence talking with them or listening to them.\n\nGod wants that same kind of time devoted to Him; he wants you to develop a relationship with Him.  Take the time to talk to Him and share what's on your heart.  Also, listen on the inside for His voice.  He will guide you and help you throughout your life."),
+                                  ],
+                                ))));
+                  },
+                  title: 'The Adoption',
+                  verses: const ["St. John 1:12"],
+                ),
+                VerseListWidget(
+                  onTapped: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const VersePage(
+                                    child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    VerseTitle(
+                                        title:
+                                            "Rededication/Out of Fellowship with God Scriptures:"),
+                                    VerseTitle(title: "1 John 1:9"),
+                                    VerseContent(
+                                        content:
+                                            "If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness."),
+                                    VerseTitle(
+                                        title: "Scriptural Enlightenment:"),
+                                    VerseContent(
+                                        content:
+                                            "Just because a person receives Jesus in their heart, doesn't mean they are perfect and will never sin again.  No one is perfect but Jesus.  Therefore, all believers will sin after they receive salvation.  The good news is that God is trustworthy and fair.  As we confess or acknowledge our sins with a repentant heart, God forsakes or omits our sins as if we never committed them.  The blood of Jesus, which was shed for our sins, cleanses us from it."),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    VerseTitle(title: "1 John 2:1-2"),
+                                    VerseContent(
+                                        content:
+                                            "My little children, these things write I unto you, that ye sin not.  And if any man sin, we have an advocate with the Father, Jesus Christ the righteous: And he is the propitiation for our sins: and not for our's only but also for the sins of the whole world."),
+                                    VerseTitle(
+                                        title: "Scriptural Enlightenment:"),
+                                    VerseContent(
+                                        content:
+                                            "Just because Jesus has paid for all sin does not excuse His people to wilffully sin.  As children of God, we should not plan to sin; rather, we should strive not to sin.  Whenever we sin or miss the mark, we should know that Jesus acts as our advocate.  He becomes our atonement or compensation for our sins."),
+                                  ],
+                                ))));
+                  },
+                  title: 'Rededication',
+                  verses: const ["1 John 1:9"],
+                ),
+              ],
+            ),
           ),
         )
       ],

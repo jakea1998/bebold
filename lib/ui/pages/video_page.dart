@@ -59,6 +59,7 @@ class _VideoPageState extends State<VideoPage> {
       chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
         aspectRatio: _videoPlayerController.value.aspectRatio,
+        materialProgressColors: ChewieProgressColors(bufferedColor: Colors.blue[100] ?? Colors.blue,handleColor: Colors.white,playedColor: Colors.blue),
         autoInitialize: true,
         autoPlay: false,
         looping: false,
@@ -92,12 +93,14 @@ class _VideoPageState extends State<VideoPage> {
     bool succeeded = false;
     if (widget.isDownloaded) {
       succeeded = await setLocalFileSource();
+      
       if (!succeeded) {
         succeeded = setNetworkUrlSource();
       }
     } else {
       succeeded = setNetworkUrlSource();
     }
+
     if (succeeded) {
       succeeded = await initChewie();
       if (succeeded) {
@@ -125,9 +128,10 @@ class _VideoPageState extends State<VideoPage> {
 
   @override
   void dispose() {
-    super.dispose();
     _videoPlayerController.dispose();
     chewieController?.dispose();
+    super.dispose();
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
@@ -165,7 +169,9 @@ class _VideoPageState extends State<VideoPage> {
       return const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(),
+          CircularProgressIndicator(
+            color: Colors.blue,
+          ),
           SizedBox(height: 20),
           Text('Loading'),
         ],

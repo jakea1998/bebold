@@ -11,20 +11,22 @@ class HomeTabButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(
+        right: 0,left:0,
+        top:0),
       child: GestureDetector(
         onTap: onTapped,
         child: Card(
           elevation: 2,
           clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
           color: lightBlueColor1,
           child: SizedBox(
             
-            width: 350,
+            width: double.infinity,
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                 child: Row(
                   children: [
                     Text(

@@ -39,12 +39,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
             backgroundColor: darkBlueColor1,
             centerTitle: true,
-            title: Image.asset(
-              'lib/assets/logo_1.png',
-              color: Colors.white,
-              height: 30,
-              fit: BoxFit.fitHeight,
-            )),
+            title: const Text(
+            "BE BOLD",
+            style: TextStyle(color: Colors.white),
+          )),
         body: Form(
           key: formKey,
           child: SafeArea(

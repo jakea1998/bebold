@@ -9,12 +9,14 @@ import 'package:be_bold/ui/widgets/info_pages/description_box.dart';
 import 'package:be_bold/ui/widgets/info_pages/edit_save_button.dart';
 import 'package:be_bold/ui/widgets/info_pages/first_last_name_box.dart';
 import 'package:be_bold/ui/widgets/info_pages/notes_box.dart';
+import 'package:be_bold/ui/widgets/info_pages/witness_box.dart';
 import 'package:be_bold/utils/spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:uuid/uuid.dart';
 
 class UserInfoPage extends StatefulWidget {
   final UserModel? userModel;
@@ -59,25 +61,41 @@ class _UserInfoPageState extends State<UserInfoPage> {
     }
   }
 
+  _deleteWitness(BuildContext context) {
+    Navigator.pop(context);
+    BlocProvider.of<LivesChangedBloc>(context).add(
+        LivesChangedEventDeleteLive(model: widget.userModel ?? UserModel()));
+  }
+
   bool _saveInfo() {
     if (formKey.currentState?.validate() ?? false) {
       try {
-        UserModel user = UserModel(
-            firstName: firstNameController.text,
-            lastName: lastNameController.text,
-            email: "",
-            phone: "",
-            address: "",
-            userId: "",
-            city: "",
-            state: "",
-            subscribeToNewsletter: false,
-            userStatus: userStatus,
-            creationDate: widget.userModel != null
-                ? widget.userModel?.creationDate
-                : DateTime.now(),
-            zipcode: "",
-            notes: notesController.text);
+        UserModel user = UserModel();
+        if (widget.isExisting) {
+          user = widget.userModel!;
+          user.firstName = firstNameController.text;
+          user.lastName = lastNameController.text;
+
+          user.creationDate = userStatus !=  user.userStatus ? DateTime.now() : user.creationDate ?? DateTime.now();
+          user.userStatus = userStatus;
+          user.notes = notesController.text;
+        } else {
+          user = UserModel(
+              firstName: firstNameController.text,
+              lastName: lastNameController.text,
+              email: "",
+              phone: "",
+              address: "",
+              userId: "",
+              city: "",
+              state: "",
+              subscribeToNewsletter: false,
+              userStatus: userStatus,
+              creationDate: DateTime.now(),
+              zipcode: "",
+              notes: notesController.text);
+          user.userId = Uuid().v1();
+        }
         BlocProvider.of<LivesChangedBloc>(context)
             .add(LivesChangedEventAddLive(model: user));
       } catch (e) {
@@ -114,8 +132,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
                     v_space_m,
                     Row(
                       children: [
-                        DeleteButton(onTap: (){}),
-                        const Spacer(flex:1),
+                        !editPressed
+                            ? DeleteButton(onTap: () {
+                                _deleteWitness(context);
+                              })
+                            : Container(),
+                        const Spacer(flex: 1),
                         EditSaveButton(
                             editPressed: editPressed,
                             onTap: () {
@@ -124,7 +146,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                 final result = _saveInfo();
                                 if (result) {
                                   EasyLoading.dismiss();
-                        
+
                                   setState(() {
                                     editPressed = false;
                                   });
@@ -149,6 +171,17 @@ class _UserInfoPageState extends State<UserInfoPage> {
                         lastNameController: lastNameController,
                         firstNameNode: firstNameNode,
                         lastNameNode: lastNameNode),
+                    WitnessBox(
+                        editPressed: editPressed,
+                        userStatus: userStatus,
+                        onTap: (status) {
+                          setState(() {
+                            userStatus = (userStatus == UserStatus.witnessed ||
+                                    userStatus == UserStatus.na)
+                                ? UserStatus.accepted
+                                : UserStatus.witnessed;
+                          });
+                        }),
                     SizedBox(
                         height: 300,
                         child: NotesBox(
@@ -156,7 +189,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             notesController: notesController,
                             height: double.infinity,
                             notesNode: notesNode)),
-                    Row(children: [
+                    /* Row(children: [
                       IconButton(
                           icon: userStatus == UserStatus.accepted
                               ? const Icon(
@@ -169,10 +202,11 @@ class _UserInfoPageState extends State<UserInfoPage> {
                                 ),
                           onPressed: () {
                             setState(() {
-                              userStatus = (userStatus == UserStatus.witnessed ||
-                                      userStatus == UserStatus.na)
-                                  ? UserStatus.accepted
-                                  : UserStatus.witnessed;
+                              userStatus =
+                                  (userStatus == UserStatus.witnessed ||
+                                          userStatus == UserStatus.na)
+                                      ? UserStatus.accepted
+                                      : UserStatus.witnessed;
                             });
                           }),
                       const SizedBox(
@@ -181,8 +215,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       const Expanded(
                           child: Text(
                               "Does this person accept Jesus as their Savior?")),
-                    ]),
-                    
+                    ]), */
                   ],
                 ),
               ),

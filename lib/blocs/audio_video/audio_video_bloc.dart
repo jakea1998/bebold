@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:be_bold/blocs/repos/audio_video_repo.dart';
 import 'package:be_bold/constants/enums.dart';
 import 'package:be_bold/models/firebase_file.dart';
@@ -7,6 +9,7 @@ import 'package:be_bold/utils/downloader_functions.dart';
 import 'package:bloc/bloc.dart';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
 import '../../models/task_info.dart';
@@ -27,22 +30,27 @@ class AudioVideoBloc extends Bloc<AudioVideoEvent, AudioVideoState> {
         List<FirebaseFile> networkVideos = [];
         List<FirebaseFile> networkAudios = [];
         // If Connected load network audios and videos based on category
+        String videoPath = Platform.isAndroid ? "androidvideos" : "videos";
+
         switch (event.type) {
           case WitnessType.acquaintance:
             networkAudios = await repo.listAll(path: 'audios/Acquaintance/');
-            networkVideos = await repo.listAll(path: 'videos/Acquaintance/');
+            networkVideos =
+                await repo.listAll(path: '$videoPath/Acquaintance/');
             break;
           case WitnessType.friend:
             networkAudios = await repo.listAll(path: 'audios/Friend/');
-            networkVideos = await repo.listAll(path: 'videos/Friend/');
+            networkVideos = await repo.listAll(path: '$videoPath/Friend/');
             break;
           case WitnessType.familyMember:
             networkAudios = await repo.listAll(path: 'audios/Family Member/');
-            networkVideos = await repo.listAll(path: 'videos/Family Member/');
+            networkVideos =
+                await repo.listAll(path: '$videoPath/Family Member/');
             break;
           case WitnessType.newConnection:
             networkAudios = await repo.listAll(path: 'audios/New Connection/');
-            networkVideos = await repo.listAll(path: 'videos/New Connection/');
+            networkVideos =
+                await repo.listAll(path: '$videoPath/New Connection/');
             break;
         }
         List<TaskInfo2> blankDownloads = [
@@ -136,11 +144,19 @@ class AudioVideoBloc extends Bloc<AudioVideoEvent, AudioVideoState> {
 
         final index = items2.indexWhere((element) =>
             element.taskId.toString() == match_item.taskId.toString());
+
         items2[index]
           ..progress = event.progress
           ..taskId = event.taskId
-          ..filePath = "$saved_directory/${match_item.name}"
-          ..status = event.status;
+          ..filePath = "$saved_directory/${match_item.categoryName}${match_item.displayName}";
+        
+        print(items2[index].filePath);
+        if (items2[index].status != DownloadTaskStatus.complete &&
+            items2[index].progress != 100) {
+          items2[index].status = event.status;
+        } else {
+          items2[index].status = DownloadTaskStatus.complete;
+        }
         emit(state.copyWith(
           connectedToInternet: connected_to_internet,
           localVideos: itemType1 == ItemType.Video ? items2 : state.localVideos,
@@ -197,7 +213,9 @@ class AudioVideoBloc extends Bloc<AudioVideoEvent, AudioVideoState> {
           state.localAudios
               ?.firstWhere((element) => element.taskId == event.taskId)
               .clearLocalTask();
-          emit(state.copyWith(localAudios: state.localAudios,status: VerseAudioVideoStatus.loaded));
+          emit(state.copyWith(
+              localAudios: state.localAudios,
+              status: VerseAudioVideoStatus.loaded));
         } on StateError catch (e) {
           print("No audio found");
         }
@@ -206,12 +224,13 @@ class AudioVideoBloc extends Bloc<AudioVideoEvent, AudioVideoState> {
           state.localVideos
               ?.firstWhere((element) => element.taskId == event.taskId)
               .clearLocalTask();
-          emit(state.copyWith(localVideos: state.localVideos,status:VerseAudioVideoStatus.loaded));
+          emit(state.copyWith(
+              localVideos: state.localVideos,
+              status: VerseAudioVideoStatus.loaded));
         } on StateError catch (e) {
           print("No video found");
         }
       }
-     
     });
   }
 }

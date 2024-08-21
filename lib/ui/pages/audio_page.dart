@@ -25,8 +25,10 @@ class AudioPageState extends State<AudioPage> with WidgetsBindingObserver {
   AudioPlayer audioPlayer = AudioPlayer();
 
   void initSource() async {
+    
     if (widget.isDownloaded) {
       try {
+        print(widget.file.filePath);
         await audioPlayer.setFilePath(widget.file.filePath);
       } on PlayerException catch (e) {
         showDialog(
@@ -251,6 +253,7 @@ class AudioPageState extends State<AudioPage> with WidgetsBindingObserver {
                                       thumbGlowColor: Colors.transparent,
                                       thumbColor: Colors.transparent,
                                       baseBarColor: Colors.grey[600],
+                                      progressBarColor: Colors.blue,
                                       timeLabelLocation:
                                           TimeLabelLocation.sides,
                                       total:
@@ -278,6 +281,7 @@ class AudioPageState extends State<AudioPage> with WidgetsBindingObserver {
                                 thumbColor: Colors.transparent,
                                 baseBarColor: Colors.grey[600],
                                 timeLabelLocation: TimeLabelLocation.sides,
+                                progressBarColor: Colors.blue,
                                 timeLabelPadding: 0,
                                 timeLabelTextStyle: const TextStyle(
                                     fontSize: 0, color: Colors.transparent),
